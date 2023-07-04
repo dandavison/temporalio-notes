@@ -1,0 +1,102 @@
+// Created by GPT4, based on https://github.com/awestlake87/pyo3-asyncio#pyo3-native-rust-modules
+// prompt below
+
+title: Python and Rust Interplay via PyO3 (Detailed)
+
+PythonRuntime -> RustLib: import my_async_module
+RustLib -> PythonRuntime: Provide rust_sleep function
+
+note PythonRuntime: Define async main() function
+
+PythonRuntime -> PythonRuntime: asyncio.run(main())
+PythonRuntime -> RustLib: Call rust_sleep()
+
+note RustLib: Create Rust Future via async block
+RustLib -> PyO3: Convert Rust Future into Python coroutine
+
+note PyO3: Through PyO3 and pyo3_asyncio, a Rust Future is wrapped into a Python coroutine
+
+PyO3 -> PythonRuntime: Return wrapped coroutine
+
+note PythonRuntime: Coroutine is scheduled in asyncio event loop for tracking
+
+PythonRuntime -> PythonRuntime: Coroutine yields control
+
+note RustRuntime: Meanwhile in Rust, tokio schedules the sleep Future
+RustRuntime -> RustRuntime: Push sleep Future into tokio task queue
+RustRuntime -> RustRuntime: Sleep Future yields and is placed back into the queue
+...: Waiting for 1 second
+RustRuntime -> RustRuntime: Wake event triggers after sleep duration
+RustRuntime -> RustRuntime: Future polled again after wake-up
+
+note PyO3: Upon completion, PyO3-asyncio bridge is notified
+RustRuntime -> PyO3: Notify that Rust Future is complete
+
+note PyO3: PyO3-asyncio bridge triggers PythonRuntime to resume coroutine
+PyO3 -> PythonRuntime: Notify that coroutine is ready to resume
+
+PythonRuntime -> PythonRuntime: Coroutine resumes
+PythonRuntime -> PythonRuntime: main() function completes
+
+// GPT4 prompt:
+// Here's a simple sequence diagram using the swimlanes.io language:
+// ----------------------BEGIN SNIPPET-----------------------
+// Alice -> Bob: Please ask Charlie whether he got the fish.
+// Bob -> Charlie: Did you get the fish?
+// Charlie -> Bob: Yep!
+// Bob -> Alice: Yes, he says he did.
+// ----------------------END SNIPPET-----------------------
+
+// And here's a demo of all available syntax: ----------------------BEGIN
+// SNIPPET----------------------- <insert full syntax from swimlanes.io website>
+// 
+// Now, please generate the text specification for a swimlanes.io diagram
+// explaining exactly what's happening in the example of calling Rust code from
+// Python using pyO3.
+// ```
+// //! lib.rs
+
+// use pyo3::{prelude::*, wrap_pyfunction};
+
+// #[pyfunction]
+// fn rust_sleep(py: Python) -> PyResult<&PyAny> {
+//     pyo3_asyncio::tokio::future_into_py(py, async {
+//         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+//         Ok(())
+//     })
+// }
+
+// #[pymodule]
+// fn my_async_module(py: Python, m: &PyModule) -> PyResult<()> {
+//     m.add_function(wrap_pyfunction!(rust_sleep, m)?)?;
+//     Ok(())
+// }
+// You can build your module with maturin (see the Using Rust in Python section
+// in the PyO3 guide for setup instructions). After that you should be able to
+// run the Python REPL to try it out.
+
+// maturin develop && python3
+// 🔗 Found pyo3 bindings
+// 🐍 Found CPython 3.8 at python3
+//     Finished dev [unoptimized + debuginfo] target(s) in 0.04s
+// Python 3.8.5 (default, Jan 27 2021, 15:41:15)
+// [GCC 9.3.0] on linux
+// Type "help", "copyright", "credits" or "license" for more information.
+// >>> import asyncio
+// >>>
+// >>> from my_async_module import rust_sleep
+// >>>
+// >>> async def main():
+// >>>     await rust_sleep()
+// >>>
+// >>> # should sleep for 1s
+// >>> asyncio.run(main())
+// >>>
+// ```
+
+// I specifically want the diagram to explain what is driving forward Python
+// coroutines, and what is driving forwards Rust futures, and how exactly this
+// is happening at the low levels of the Rust Future execution model, and also
+// the analogous things in Python, if they are occurring in this example code.
+// You may make use of any of the swimlanes.io markup syntax, in addition to the
+// basic message-passing syntax.
