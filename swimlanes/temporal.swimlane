@@ -1,0 +1,56 @@
+title: Temporal
+
+lang-Worker -> lang-Worker: Worker.run
+
+note lang-Worker,sdk-core:
+create poll tasks [_worker.py:399](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/worker/_worker.py:399)
+
+```python
+tasks.append(asyncio.create_task(self.X_worker.run()))
+...
+while True:
+    await asyncio.create_task(bridge_worker.poll_X())
+```
+
+create Rust future and return corresponding Python awaitable  [bridge::src/worker.rs:114](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/src/worker.rs:114) 
+```rust
+fn poll_X(py: Python) -> PyResult<&PyAny> {
+    runtime.future_into_py(py, async move {
+        bytes = sdk_core::worker.poll_X().await
+        bytes.into_py(py)
+    })
+}
+```
+
+
+lang-Worker -> sdk-core: tokio::spawn(poll_fut)
+lang-Worker -> lang-Worker: await poll_fut
+note sdk-core:
+tokio is executing poll task for Activity and WorkflowActivation queues  
+[sdk-core::worker/mod.rs:95](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/core/src/worker/mod.rs:95)
+```rust
+async fn poll_X() -> Result<XTask, PollXError> {
+    loop {
+        match self.poll_X().await {
+            Some(r) => break r,
+            None => {
+                tokio::task::yield_now().await;
+                continue;
+            }
+        }
+    }
+}
+```
+[sdk-core::worker/mod.rs:405](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/core/src/worker/mod.rs:405)  
+[sdk-core::worker/activities.rs:293](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/core/src/worker/activities.rs:293)  
+[sdk-core::worker/workflow/mod.rs:270](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/core/src/worker/workflow/mod.rs:270)
+
+
+
+History -> History: **app** -> start_workflow
+History -> History: write_empty_history
+History -> Matching: enqueue WFAct task
+Matching -> Matching: write to queue
+sdk-core -> Matching: poll WFAct queue
+Matching -> sdk-core: WFAct task
+lang-Worker -> lang-Worker: replay
