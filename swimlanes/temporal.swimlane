@@ -1,8 +1,12 @@
 title: Temporal
 
+
 lang-Worker -> lang-Worker: Worker.run
 
 note lang-Worker,sdk-core:
+
+Create a WorkflowWorker holding the workflow classes [_workflow.py:113](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/.venv/lib/python3.11/site-packages/temporalio/worker/_workflow.py:113). Each workflow is stored as a [workflow._Definition](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/.venv/lib/python3.11/site-packages/temporalio/workflow.py:867), which has a run_fn (this run_fn will be called later when we handle a WorkflowActivation).
+
 create poll tasks [_worker.py:399](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/worker/_worker.py:399)
 
 ```python
@@ -16,8 +20,8 @@ create Rust future and return corresponding Python awaitable  [bridge::src/worke
 ```rust
 fn poll_X(py: Python) -> PyResult<&PyAny> {
     runtime.future_into_py(py, async move {
-        bytes = sdk_core::worker.poll_X().await
-        bytes.into_py(py)
+        proto_bytes = sdk_core::worker.poll_X().await
+        proto_bytes.into_py(py)
     })
 }
 ```
@@ -45,12 +49,63 @@ async fn poll_X() -> Result<XTask, PollXError> {
 [sdk-core::worker/activities.rs:293](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/core/src/worker/activities.rs:293)  
 [sdk-core::worker/workflow/mod.rs:270](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/core/src/worker/workflow/mod.rs:270)
 
-
+_:
 
 History -> History: **app** -> start_workflow
-History -> History: write_empty_history
 History -> Matching: enqueue WFAct task
 Matching -> Matching: write to queue
 sdk-core -> Matching: poll WFAct queue
 Matching -> sdk-core: WFAct task
-lang-Worker -> lang-Worker: replay
+sdk-core -> lang-Worker: proto_bytes.into_py(py)
+note lang-Worker,sdk-core:
+WorkflowWorker.run [_workflow.py:115](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/worker/_workflow.py:115)
+
+```python
+asyncio.create_task(self._handle_activation(act_proto))
+```
+
+    
+
+WorkflowWorker.handle_activation [_workflow.py:190](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/worker/_workflow.py:190)
+```python
+workflow = self._create_workflow_instance(act_proto)
+```
+WorkflowWorker.create_workflow_instance [_workflow.py:350](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/worker/_workflow.py:350)  
+UnsandboxedWfRunner.create_instance [workflow_instance.py:144](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/worker/_workflow_instance.py:144)  
+WorkflowInstanceImpl.\_\_init__ [workflow_instance.py:161](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/worker/_workflow_instance.py:161)
+```python
+class _WorkflowInstanceImpl(
+    WorkflowInstance,
+    temporalio.workflow._Runtime,
+    asyncio.AbstractEventLoop
+):
+    "Instance of a workflow that can handle activations."
+
+    def activate(self, act_proto) -> CompletionProto:
+        "Handle an activation and return completion"
+    ...
+
+```
+workflow.activate [\_workflow.py:194](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/worker/_workflow.py:194)  
+[\_workflow_instance.py:249](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/worker/_workflow_instance.py:249)
+
+workflow.activate calls [workflow.apply_start_workflow](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/worker/_workflow_instance.py:615) which calls \_WorkflowInboundImpl.execute\_workflow, which calls the run_fn [\_workflow_instance.py:1451](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/worker/_workflow_instance.py:1451)
+
+
+sdk-rust WorkflowFuture.poll [sworkflow_future.rs:239](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_future.rs:239)
+
+sdk-rust WorkflowFuture handle jobs [workflow_future.rs:264](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_future.rs:264)
+
+
+
+Expectation: should replay workflow? Or is it just creating a new WorkflowActivationCompletion proto for a new workflow?
+
+Some calls to execute_activity retrieve precomputed values from wf history.
+
+
+
+lang-Worker -> lang-Worker: replay (TODO)
+
+lang-worker -> sdk-core: complete_workflow_activation
+note sdk-core:
+[sdk-core::worker/mod.rs:536](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/core/src/worker/mod.rs:536)
