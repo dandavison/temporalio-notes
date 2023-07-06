@@ -4,6 +4,7 @@ title: Temporal
 lang-Worker -> lang-Worker: Worker.run
 
 note lang-Worker,sdk-core:
+**Python SDK**
 
 Create a WorkflowWorker holding the workflow classes [_workflow.py:113](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/.venv/lib/python3.11/site-packages/temporalio/worker/_workflow.py:113). Each workflow is stored as a [workflow._Definition](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/.venv/lib/python3.11/site-packages/temporalio/workflow.py:867), which has a run_fn (this run_fn will be called later when we handle a WorkflowActivation).
 
@@ -55,12 +56,24 @@ History -> History: **app** -> start_workflow
 History -> Matching: enqueue WFAct task
 Matching -> Matching: write to queue
 sdk-core -> Matching: poll WFAct queue
-Matching -> sdk-core: WFAct task
-sdk-core -> lang-Worker: proto_bytes.into_py(py)
-note lang-Worker,sdk-core:
+Matching -> sdk-core: WF Activation data
+sdk-core -> lang-Worker: WF Activation data
+note:
+**Rust SDK**  
+sdk-rust WorkflowFuture.poll [sworkflow_future.rs:239](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_future.rs:239)
+
+sdk-rust WorkflowFuture handle jobs [workflow_future.rs:264](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_future.rs:264)
+
+How are Activities unblocked if the unblocker is ()?
+[sdk-rust::workflow_context.rs:204](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_context.rs:204)
+
+
+//note:
+ **Python SDK**
 WorkflowWorker.run [_workflow.py:115](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/worker/_workflow.py:115)
 
 ```python
+// receives from Rust: proto_bytes.into_py(py)
 asyncio.create_task(self._handle_activation(act_proto))
 ```
 
@@ -81,8 +94,8 @@ class _WorkflowInstanceImpl(
 ):
     "Instance of a workflow that can handle activations."
 
-    def activate(self, act_proto) -> CompletionProto:
-        "Handle an activation and return completion"
+//    def activate(self, act_proto) -> CompletionProto:
+//        "Handle an activation and return completion"
     ...
 
 ```
@@ -91,10 +104,6 @@ workflow.activate [\_workflow.py:194](vscode-insiders://file/Users/dan/tmp/3p/te
 
 workflow.activate calls [workflow.apply_start_workflow](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/worker/_workflow_instance.py:615) which calls \_WorkflowInboundImpl.execute\_workflow, which calls the run_fn [\_workflow_instance.py:1451](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/worker/_workflow_instance.py:1451)
 
-
-sdk-rust WorkflowFuture.poll [sworkflow_future.rs:239](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_future.rs:239)
-
-sdk-rust WorkflowFuture handle jobs [workflow_future.rs:264](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_future.rs:264)
 
 
 
