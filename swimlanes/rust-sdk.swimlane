@@ -1,0 +1,59 @@
+Title: Temporal Rust SDK
+
+note Wf Activations polling loop:
+receive activation from server:  
+[`Worker.workflow_activation_handler`](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/lib.rs:296)
+
+note:
+Activation is for a new workflow execution:  
+[create Wf future](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/lib.rs:406)
+and
+[send](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/lib.rs:302) it to stream processor for submission to executor.
+
+note Wf Future in-progress:
+[`WorkflowFunction.start_workflow()`](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/lib.rs:456)  
+
+Wf Future in-progress -> Wf Function Future: create
+note Wf Function Future: 
+Create a `WorkflowFunction` future with:
+- a `WfContext` instance, with  
+  - an `incoming_commands` send handle.
+
+note Wf Future in-progress:
+Create a `WorkflowFuture` with:
+- the `WorkflowFunction` future 
+- `incoming_commands` receive handle
+- `incoming_activations` receive handle
+
+The `incoming_activations` send handle is stored in `Worker.workflows`.
+
+
+
+
+Tokio -> Wf Future in-progress: `poll()`
+
+note Wf Activations polling loop:
+[send](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/lib.rs:425) activation to Wf future incoming activations channel.
+
+Wf Activations polling loop -> Wf Future in-progress:
+
+Tokio -> Wf Future in-progress: `poll()`
+note Wf Future in-progress:
+
+[`poll()`](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_future.rs:440)
+
+- For every job in the activation:
+[`handle_job`](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_future.rs:468)
+([job Variants](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/target/aarch64-apple-darwin/debug/build/temporal-sdk-core-protos-5d18df293f12871d/out/coresdk.workflow_activation.rs:55))
+
+
+note:
+job: [ResolveActivity](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_future.rs:164)
+
+
+
+Wf completions stream processor -> Wf completions stream processor:
+Activity task polling loop -> Activity task polling loop:
+
+
+order: Wf Activations polling loop, Wf Future in-progress, Wf Function Future, Tokio, Wf completions stream processor, Activity task polling loop
