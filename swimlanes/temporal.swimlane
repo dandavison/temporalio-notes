@@ -1,9 +1,41 @@
 title: Temporal
 
+note lang-Worker:
+A [`Worker`](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/lib.rs:126) has:
+- a task queue
+- an [`sdk-core::Worker`](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/core-api/src/lib.rs:18)
+- a channel for sending (to whom?) [`WorkflowActivations`](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/target/aarch64-apple-darwin/debug/build/temporal-sdk-core-protos-5d18df293f12871d/out/coresdk.workflow_activation.rs:9)
+- Collections of [`WorkflowFunctions`](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/lib.rs:700) and [`ActivityFunctions`](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/lib.rs:771)
+
 
 lang-Worker -> lang-Worker: Worker.run
 
-note lang-Worker,sdk-core:
+note:
+[`Worker.run()`](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/lib.rs:229) does the following concurrently:  
+
+- Every wf activation received is handled (it should unblock some things, thus advancing its workflow)
+- Every activity received is handled by spawning an activity task 
+- Every completion received is sent to sdk-core to be sent to the server.
+- Every WorkflowFutureHandle received is submitted to the executor to be [run to completion](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/lib.rs:250).
+
+
+Some of the key channels are set up in [`WorkflowFunction.start_workflow`](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_future.rs:46)
+
+The Wf function is given a `WorkflowContext` that contains the send end of the channel to which commands are written.
+
+The `WorkflowContext` is used to do things such as call activities in the workflow. It is here that the `unblocker` is created: [`WFContext::activity`](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_context.rs:204)
+
+
+[workflow_activation_job::Variant](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/target/aarch64-apple-darwin/debug/build/temporal-sdk-core-protos-5d18df293f12871d/out/coresdk.workflow_activation.rs:55)  
+[workflow_command::Variant](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/target/aarch64-apple-darwin/debug/build/temporal-sdk-core-protos-5d18df293f12871d/out/coresdk.workflow_commands.rs:23)  
+[RustWfCmd](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/lib.rs:712)
+
+
+
+
+
+
+// note lang-Worker,sdk-core:
 **Python SDK**
 
 Create a WorkflowWorker holding the workflow classes [_workflow.py:113](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/.venv/lib/python3.11/site-packages/temporalio/worker/_workflow.py:113). Each workflow is stored as a [workflow._Definition](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/.venv/lib/python3.11/site-packages/temporalio/workflow.py:867), which has a run_fn (this run_fn will be called later when we handle a WorkflowActivation).
