@@ -1,5 +1,6 @@
 Title: Temporal Rust SDK
 
+Wf Activations polling loop -> sdk-core: `poll_workflow_activation`
 note Wf Activations polling loop:
 receive activation from server:  
 [`Worker.workflow_activation_handler`](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/lib.rs:296)
@@ -49,8 +50,7 @@ note WorkflowFuture:
 
 
 WorkflowFuture -> WorkflowFunction: `poll()`
-note WorkflowFunction:
-Workflow code reaches an activity call:    
+note WorkflowFunction:Workflow code reaches an activity call:    
 [`ctx
 .activity(activity_opts)
 .await`](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_context.rs:204)
@@ -65,12 +65,12 @@ note WorkflowFuture:
 
 3. For every `incoming_command`, [add an entry](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_future.rs:362) to `command_status` containing the `unblocker` for the command.
 
-4. [send](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_future.rs:507) the list of commands to the server as a `WorkflowActivationCompletion` proto.
+4. [send](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_future.rs:507) the list of commands to the server as a `WorkflowActivationCompletion` proto.  
+**TODO** what causes sdk-core to respond to [sending](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_future.rs:142) the completion to `outgoing_completions`?
 
-note WorkflowFunction:
-2. Return a `WFCommandFut`, to be awaited in the workflow code. The future contains the receive end of the `unblocker` channel.
+WorkflowFuture -> sdk-core: completion
 
-
+note WorkflowFunction:2. Return a `WFCommandFut`, to be awaited in the workflow code. The future contains the receive end of the `unblocker` channel.
 ...:
 _:
 note __all__: **TODO**: activity task is received, activity is called, resulting in next workflow activation containing a `ResolveActivity` job.
@@ -93,19 +93,30 @@ note WorkflowFuture:
 
 [`poll()`](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_future.rs:440)
 
-- For every job in the activation:
+1. For every job in the activation:
 [`handle_job()`](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_future.rs:468)  
-(available [job Variants](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/target/aarch64-apple-darwin/debug/build/temporal-sdk-core-protos-5d18df293f12871d/out/coresdk.workflow_activation.rs:55))
+(available [job Variants](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/target/aarch64-apple-darwin/debug/build/temporal-sdk-core-protos-5d18df293f12871d/out/coresdk.workflow_activation.rs:55))  
 
 
-note:
 job: [ResolveActivity](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_future.rs:164)
 
+`handle_job()` calls [`unblock()`](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_future.rs:116), and sends `UnblockEvent::Activity` to the `unblocker` (which had been stored in `command_status`)
+
+WorkflowFuture -> WorkflowFunction: `UnblockEvent::Activity`
+
+note WorkflowFuture:
+2. [Advance](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_future.rs:488) Workflow function 
 
 
+WorkflowFuture -> WorkflowFunction: `poll()`
+
+note WorkflowFunction:Recall that the workflow function is awaiting on `ctx.activity(act)`, and that this returns a `WFCommandFut`.
+
+The [`WFCommandFut.poll()`](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/workflow_context.rs:458) implementation handles the `UnblockEvent::Activity` by `take`-ing the `other_dat` (TODO: significance?) and calling [Unblockable::unblock](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/lib.rs:616), the result of which is to return `Poll::Ready(act_result)`.
+
+The workflow function thus advances beyond the activity call.
 Wf completions stream processor -> Wf completions stream processor:
 Activity task polling loop -> Activity task polling loop:
 
 
-order: Tokio, Wf Activations polling loop, WorkflowFuture, WorkflowFunction, Wf completions stream processor, Activity task polling loop
-
+order: Tokio, Wf Activations polling loop, WorkflowFuture, WorkflowFunction, sdk-core, Wf completions stream processor, Activity task polling loop
