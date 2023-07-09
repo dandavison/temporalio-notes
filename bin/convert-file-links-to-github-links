@@ -1,0 +1,96 @@
+#!/usr/bin/env python
+import argparse
+import re
+import subprocess
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict
+
+VSCODE_FILE_LINK_REGEX = (
+    r"(?P<protocol>vscode|vscode-insiders)://file/(?P<path>[^:]+):(?P<line>\d+)"
+)
+
+
+def main(text: str) -> str:
+    return re.sub(VSCODE_FILE_LINK_REGEX, file_link_to_github_link, text)
+
+
+def file_link_to_github_link(file_link: re.Match) -> str:
+    parsed = file_link.groupdict()
+
+    # This VSCode extension formats links as "vscode://${file}${abspath}:${line}", i.e. with a single slash:
+    # https://github.com/ebetancourt/hipdot-vs-code-url-scheme-grabber/blob/73ed8653dd6631bda4f103a3038243bba7513d98/src/extension.ts#L35
+    # Both single- and double-slash after "file" work, so we support both.
+    # https://code.visualstudio.com/docs/editor/command-line#_opening-vs-code-with-urls
+    if not parsed["path"].startswith("/"):
+        parsed["path"] = "/" + parsed["path"]
+
+    file_data = FileData.from_path_and_line(Path(parsed["path"]), int(parsed["line"]))
+    return file_data.format_github_link()
+
+
+@dataclass
+class FileData:
+    repo: "GitRepo"
+    path: Path
+    line: int
+
+    @classmethod
+    def from_path_and_line(cls, path: Path, line: int) -> "FileData":
+        repo = GitRepo.from_file_path(path)
+        return cls(repo=repo, path=path.relative_to(repo.root), line=line)
+
+    def format_github_link(self) -> str:
+        return (
+            f"https://github.com/{self.repo.name}/blob/{self.repo.commit}/{self.path}#L{self.line}"
+        )
+
+
+class GitRepo:
+    _cache: Dict[Path, "GitRepo"] = {}
+
+    @classmethod
+    def from_file_path(cls, path: Path) -> "GitRepo":
+        root = Path(git("-C", path.parent, "rev-parse", "--show-toplevel"))
+        if root not in cls._cache:
+            cls._cache[root] = cls(root)
+        return cls._cache[root]
+
+    def __init__(self, root: Path):
+        self.root = root
+        self.url = self.command("remote", "get-url", "origin")
+        try:
+            self.commit = self.command("rev-parse", "origin/main", stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError:
+            try:
+                self.commit = self.command("rev-parse", "origin/master", stderr=subprocess.STDOUT)
+            except subprocess.CalledProcessError:
+                sys.stderr.write(f"Neither origin/main nor origin/master exist at {self.root}")
+                sys.exit(1)
+
+    @property
+    def name(self) -> str:
+        url_regex = r"^https?://github.com/(?P<name>.+)\.git$"
+        assert (match := re.match(url_regex, self.url))
+        return match.groupdict()["name"]
+
+    def command(self, *args, **kwargs) -> str:
+        return git("-C", self.root, *args, **kwargs)
+
+
+def git(*args, **kwargs) -> str:
+    return subprocess.check_output(["git", *args], **kwargs).decode("utf-8").strip()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--in-place", help="Modify file in-place", type=Path, required=False)
+    args = parser.parse_args()
+    if args.in_place:
+        with open(args.in_place, "r+") as file:
+            text = file.read()
+            file.seek(0)
+            file.write(main(text))
+    else:
+        sys.stdout.write(main(sys.stdin.read()))
