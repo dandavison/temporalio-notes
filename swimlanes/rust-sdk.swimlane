@@ -7,6 +7,23 @@ note __all__: [`Worker.run()`](https://github.com/temporalio/sdk-core/blob/492d6
 ...:
 
 Wf Activations polling loop -> sdk-core: `poll_workflow_activation`
+
+note sdk-core:
+[`poll_workflow_activation()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/mod.rs#L89)
+
+[`next_workflow_activation()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/mod.rs#L269)
+
+note sdk-core: How are the state machines used?
+
+[`worker::workflow` module](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/mod.rs#L3)
+
+`worker::workflow::managed_run` module:
+
+[`ManagedRun`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/managed_run.rs#L60) struct has a [`WorkflowManager`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/managed_run.rs#L1160) instance, which has a [`WorkflowMachines`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/machines/workflow_machines.rs#L72) instance.
+
+
+
+
 note Wf Activations polling loop:
 receive activation from server:  
 [`Worker.workflow_activation_handler`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L296)
@@ -83,11 +100,17 @@ note Activity task polling loop:
 
 [spawn future](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/sdk/src/lib.rs#L519)
 
+note ActivityFuture: **Tokio** → poll  
 
-Activity task polling loop -> sdk-core: `complete_activity_task(result)`
+[await activity fn](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/sdk/src/lib.rs#L520)  
+
+[`complete_activity_task(result)`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/sdk/src/lib.rs#L547)
+
+ActivityFuture -> sdk-core: 
 
 note sdk-core:
-[`complete_activity(status)`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/mod.rs#L127)
+[`complete_activity(status)`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/mod.rs#L127)  
+[`WorkerActivityTasks.complete()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/activities.rs#L300)
 
 
 ...:
@@ -129,4 +152,4 @@ The [`WFCommandFut.poll()`](https://github.com/temporalio/sdk-core/blob/492d687b
 The workflow function thus advances beyond the activity call.
 
 
-order: Wf Activations polling loop, WorkflowFuture, WorkflowFunction, Activity task polling loop, sdk-core
+order: Wf Activations polling loop, WorkflowFuture, WorkflowFunction, Activity task polling loop, ActivityFuture, sdk-core
