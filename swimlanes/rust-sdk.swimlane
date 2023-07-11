@@ -1,6 +1,6 @@
 Title: Temporal Rust SDK
 
-note __all__: [`Worker.run()`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L229)
+note __all__: [`Worker.run()`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L229) 
 
 
 
@@ -79,14 +79,16 @@ note __all__: **TODO**: activity task is received, activity is called, resulting
 Activity task polling loop -> sdk-core: `poll_activity_task`
 
 note Activity task polling loop:
-[`activity_task_handler`](vscode-insiders://file/tmp/temporalio/sdk-core/sdk/src/lib.rs:317)
+[`activity_task_handler`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/sdk/src/lib.rs#L325)
 
-[spawn future](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/sdk/src/lib.rs:520)  with activity call as subfuture
+[spawn future](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/sdk/src/lib.rs#L519)
+
 
 Activity task polling loop -> sdk-core: `complete_activity_task(result)`
 
 note sdk-core:
-[`complete_activity(status)`](vscode-insiders://file/Users/dan/tmp/3p/temporalio/sdk-python/temporalio/bridge/sdk-core/core/src/worker/mod.rs:128)
+[`complete_activity(status)`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/mod.rs#L127)
+
 
 ...:
 _:
@@ -128,4 +130,3 @@ The workflow function thus advances beyond the activity call.
 
 
 order: Wf Activations polling loop, WorkflowFuture, WorkflowFunction, Activity task polling loop, sdk-core
-ctivations polling loop, WorkflowFuture, WorkflowFunction, Activity task polling loop, sdk-core
