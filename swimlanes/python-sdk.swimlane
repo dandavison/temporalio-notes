@@ -1,0 +1,117 @@
+title: Python SDK
+
+note lang-Worker:
+A [`Worker`](https://github.com/temporalio/sdk-core/blob/8138e06b916e0aa0d191d1f62f4de192845fdc81/sdk/src/lib.rs#L126) has:
+- a task queue
+- an [`sdk-core::Worker`](https://github.com/temporalio/sdk-core/blob/8138e06b916e0aa0d191d1f62f4de192845fdc81/core-api/src/lib.rs#L18)
+- a channel for sending (to whom?) [`WorkflowActivations`](vscode-insiders: //file/Users/dan/src/temporalio/sdk-python/temporalio/bridge/sdk-core/target/aarch64-apple-darwin/debug/build/temporal-sdk-core-protos-5d18df293f12871d/out/coresdk.workflow_activation.rs:9)
+- Collections of [`WorkflowFunctions`](https://github.com/temporalio/sdk-core/blob/8138e06b916e0aa0d191d1f62f4de192845fdc81/sdk/src/lib.rs#L700) and [`ActivityFunctions`](https://github.com/temporalio/sdk-core/blob/8138e06b916e0aa0d191d1f62f4de192845fdc81/sdk/src/lib.rs#L771)
+
+
+lang-Worker -> lang-Worker: Worker.run
+
+
+
+note lang-Worker,sdk-core:
+Create a WorkflowWorker holding the workflow classes [_workflow.py:113](https://github.com/temporalio/sdk-python/blob/b902ec838d9360826dabf41cc13bb502858d7992/temporalio/worker/_workflow.py#L113). Each workflow is stored as a [workflow._Definition](https://github.com/temporalio/sdk-python/blob/b902ec838d9360826dabf41cc13bb502858d7992/temporalio/workflow.py#L867), which has a run_fn (this run_fn will be called later when we handle a WorkflowActivation).
+
+create poll tasks [_worker.py:399](https://github.com/temporalio/sdk-python/blob/b902ec838d9360826dabf41cc13bb502858d7992/temporalio/worker/_worker.py#L399)
+
+```python
+tasks.append(asyncio.create_task(self.X_worker.run()))
+...
+while True:
+    await asyncio.create_task(bridge_worker.poll_X())
+```
+
+create Rust future and return corresponding Python awaitable  [bridge::src/worker.rs:114](https://github.com/temporalio/sdk-python/blob/b902ec838d9360826dabf41cc13bb502858d7992/temporalio/bridge/src/worker.rs#L114) 
+```rust
+fn poll_X(py: Python) -> PyResult<&PyAny> {
+    runtime.future_into_py(py, async move {
+        proto_bytes = sdk_core::worker.poll_X().await
+        proto_bytes.into_py(py)
+    })
+}
+```
+
+
+lang-Worker -> sdk-core: tokio::spawn(poll_fut)
+lang-Worker -> lang-Worker: await poll_fut
+note sdk-core:
+tokio is executing poll task for Activity and WorkflowActivation queues  
+[sdk-core::worker/mod.rs:95](https://github.com/temporalio/sdk-core/blob/8138e06b916e0aa0d191d1f62f4de192845fdc81/core/src/worker/mod.rs#L95)
+```rust
+async fn poll_X() -> Result<XTask, PollXError> {
+    loop {
+        match self.poll_X().await {
+            Some(r) => break r,
+            None => {
+                tokio::task::yield_now().await;
+                continue;
+            }
+        }
+    }
+}
+```
+[sdk-core::worker/mod.rs:405](https://github.com/temporalio/sdk-core/blob/8138e06b916e0aa0d191d1f62f4de192845fdc81/core/src/worker/mod.rs#L405)  
+[sdk-core::worker/activities.rs:293](https://github.com/temporalio/sdk-core/blob/8138e06b916e0aa0d191d1f62f4de192845fdc81/core/src/worker/activities.rs#L293)  
+[sdk-core::worker/workflow/mod.rs:270](https://github.com/temporalio/sdk-core/blob/8138e06b916e0aa0d191d1f62f4de192845fdc81/core/src/worker/workflow/mod.rs#L270)
+
+_:
+
+History -> History: **app** -> start_workflow
+History -> Matching: enqueue WFAct task
+Matching -> Matching: write to queue
+sdk-core -> Matching: poll WFAct queue
+Matching -> sdk-core: WF Activation data
+sdk-core -> lang-Worker: WF Activation data
+
+note:
+WorkflowWorker.run [_workflow.py:115](https://github.com/temporalio/sdk-python/blob/b902ec838d9360826dabf41cc13bb502858d7992/temporalio/worker/_workflow.py#L115)
+
+```python
+# receives from Rust: proto_bytes.into_py(py)
+asyncio.create_task(self._handle_activation(act_proto))
+```
+
+    
+
+WorkflowWorker.handle_activation [_workflow.py:190](https://github.com/temporalio/sdk-python/blob/b902ec838d9360826dabf41cc13bb502858d7992/temporalio/worker/_workflow.py#L190)
+```python
+workflow = self._create_workflow_instance(act_proto)
+```
+WorkflowWorker.create_workflow_instance [_workflow.py:350](https://github.com/temporalio/sdk-python/blob/b902ec838d9360826dabf41cc13bb502858d7992/temporalio/worker/_workflow.py#L350)  
+UnsandboxedWfRunner.create_instance [workflow_instance.py:144](https://github.com/temporalio/sdk-python/blob/b902ec838d9360826dabf41cc13bb502858d7992/temporalio/worker/_workflow_instance.py#L144)  
+WorkflowInstanceImpl.\_\_init__ [workflow_instance.py:161](https://github.com/temporalio/sdk-python/blob/b902ec838d9360826dabf41cc13bb502858d7992/temporalio/worker/_workflow_instance.py#L161)
+```python
+class _WorkflowInstanceImpl(
+    WorkflowInstance,
+    temporalio.workflow._Runtime,
+    asyncio.AbstractEventLoop
+):
+    "Instance of a workflow that can handle activations."
+
+//    def activate(self, act_proto) -> CompletionProto:
+//        "Handle an activation and return completion"
+    ...
+
+```
+workflow.activate [\_workflow.py:194](https://github.com/temporalio/sdk-python/blob/b902ec838d9360826dabf41cc13bb502858d7992/temporalio/worker/_workflow.py#L194)  
+[\_workflow_instance.py:249](https://github.com/temporalio/sdk-python/blob/b902ec838d9360826dabf41cc13bb502858d7992/temporalio/worker/_workflow_instance.py#L249)
+
+workflow.activate calls [workflow.apply_start_workflow](https://github.com/temporalio/sdk-python/blob/b902ec838d9360826dabf41cc13bb502858d7992/temporalio/worker/_workflow_instance.py#L615) which calls \_WorkflowInboundImpl.execute\_workflow, which calls the run_fn [\_workflow_instance.py:1451](https://github.com/temporalio/sdk-python/blob/b902ec838d9360826dabf41cc13bb502858d7992/temporalio/worker/_workflow_instance.py#L1451)
+
+
+
+
+Expectation: should replay workflow? Or is it just creating a new WorkflowActivationCompletion proto for a new workflow?
+
+Some calls to execute_activity retrieve precomputed values from wf history.
+
+
+
+lang-Worker -> lang-Worker: replay (TODO)
+
+lang-worker -> sdk-core: complete_workflow_activation
+note sdk-core:
+[sdk-core::worker/mod.rs:536](https://github.com/temporalio/sdk-core/blob/8138e06b916e0aa0d191d1f62f4de192845fdc81/core/src/worker/mod.rs#L536)
