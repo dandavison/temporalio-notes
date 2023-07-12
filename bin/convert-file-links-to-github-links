@@ -71,8 +71,10 @@ class GitRepo:
 
     @property
     def name(self) -> str:
-        url_regex = r"^https?://github.com/(?P<name>.+)\.git$"
-        assert (match := re.match(url_regex, self.url))
+        url_regex = r"^(https?://|git@)github.com[/:](?P<name>[^.]+)(\.git)?$"
+        assert (
+            match := re.match(url_regex, self.url)
+        ), f"regex {url_regex} doesn't match url: {self.url}"
         return match.groupdict()["name"]
 
     def command(self, *args, **kwargs) -> str:
