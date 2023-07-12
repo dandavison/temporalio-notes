@@ -1,7 +1,30 @@
 Title: Rust SDK
 
-note __all__: [`Worker.run()`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L229) 
+note __all__: How are the state machines used?
 
+[`TemporalStateMachine::handle_command()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/machines/mod.rs#L128)  
+[`TemporalStateMachine::handle_event()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/machines/mod.rs#L167)
+  
+The only call to `handle_event` that I can find is [`WorkflowMachines::submachine_handle_event()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/machines/workflow_machines.rs#L823), which is called by [`WorkflowMachines::handle_event()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/machines/workflow_machines.rs#L595), called by [`WorkflowMachines::apply_next_wft_from_history()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/machines/workflow_machines.rs#L420), called by [`WorkflowManager::get_next_activation()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/managed_run.rs#L1216)
+
+
+A lang [`Worker`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/sdk/src/lib.rs#L125) has a core [`Worker`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/mod.rs#L267) has a `Workflows` instance.
+
+[`Workflows::new()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/mod.rs#L160) creates a `processing_task` which calls [`WFStream::build()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/mod.rs#L211).
+
+[`WFStream`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/workflow_stream.rs#L30) has a [`RunCache`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/run_cache.rs#L12), has a [`ManagedRun`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/managed_run.rs#L60), has a [`WorkflowManager`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/managed_run.rs#L1160), has a [`WorkflowMachines`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/machines/workflow_machines.rs#L72) instance.
+
+Fine. But what do they do?
+
+Why does a lang `Worker` have a core `Worker`? What methods on the latter are called?
+
+Maybe here is a decent starting point:
+
+[`activation_completed`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/mod.rs#L325)
+
+...:
+
+note __all__: [`Worker.run()`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L229) 
 
 
 ...:
@@ -12,15 +35,6 @@ note sdk-core:
 [`poll_workflow_activation()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/mod.rs#L89)
 
 [`next_workflow_activation()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/mod.rs#L269)
-
-note sdk-core: How are the state machines used?
-
-[`worker::workflow` module](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/mod.rs#L3)
-
-[`Workflows::new()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/mod.rs#L160) calls [`WFStream::build()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/mod.rs#L211).
-
-[`WFStream`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/workflow_stream.rs#L30) has a [`RunCache`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/run_cache.rs#L12), has a [`ManagedRun`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/managed_run.rs#L60), has a [`WorkflowManager`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/managed_run.rs#L1160), has a [`WorkflowMachines`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/machines/workflow_machines.rs#L72) instance.
-
 
 
 
