@@ -2,17 +2,17 @@ Title: Rust SDK
 
 note __all__: How are the state machines used?
 
-[`TemporalStateMachine::handle_command()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/machines/mod.rs#L128)  
-[`TemporalStateMachine::handle_event()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/machines/mod.rs#L167)
+[`TemporalStateMachine::handle_command()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/machines/mod.rs#L129)  
+[`TemporalStateMachine::handle_event()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/machines/mod.rs#L168)
   
-The only call to `handle_event` that I can find is [`WorkflowMachines::submachine_handle_event()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/machines/workflow_machines.rs#L823), which is called by [`WorkflowMachines::handle_event()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/machines/workflow_machines.rs#L595), called by [`WorkflowMachines::apply_next_wft_from_history()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/machines/workflow_machines.rs#L420), called by [`WorkflowManager::get_next_activation()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/managed_run.rs#L1216)
+The only call to `handle_event` that I can find is [`WorkflowMachines::submachine_handle_event()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/machines/workflow_machines.rs#L824), which is called by [`WorkflowMachines::handle_event()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/machines/workflow_machines.rs#L596), called by [`WorkflowMachines::apply_next_wft_from_history()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/machines/workflow_machines.rs#L421), called by [`WorkflowManager::get_next_activation()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/managed_run.rs#L1217)
 
 
-A lang [`Worker`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/sdk/src/lib.rs#L125) has a core [`Worker`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/mod.rs#L267) has a `Workflows` instance.
+A lang [`Worker`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/sdk/src/lib.rs#L126) has a core [`Worker`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/mod.rs#L268) has a `Workflows` instance.
 
-[`Workflows::new()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/mod.rs#L160) creates a `processing_task` which calls [`WFStream::build()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/mod.rs#L211).
+[`Workflows::new()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/mod.rs#L161) creates a `processing_task` which calls [`WFStream::build()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/mod.rs#L212).
 
-[`WFStream`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/workflow_stream.rs#L30) has a [`RunCache`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/run_cache.rs#L12), has a [`ManagedRun`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/managed_run.rs#L60), has a [`WorkflowManager`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/managed_run.rs#L1160), has a [`WorkflowMachines`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/machines/workflow_machines.rs#L72) instance.
+[`WFStream`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/workflow_stream.rs#L31) has a [`RunCache`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/run_cache.rs#L13), has a [`ManagedRun`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/managed_run.rs#L61), has a [`WorkflowManager`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/managed_run.rs#L1161), has a [`WorkflowMachines`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/machines/workflow_machines.rs#L73) instance.
 
 Fine. But what do they do?
 
@@ -20,11 +20,11 @@ Why does a lang `Worker` have a core `Worker`? What methods on the latter are ca
 
 Maybe here is a decent starting point:
 
-[`activation_completed`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/mod.rs#L325)
+[`activation_completed`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/mod.rs#L326)
 
 ...:
 
-note __all__: [`Worker.run()`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L229) 
+note __all__: [`Worker.run()`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L230) 
 
 
 ...:
@@ -32,74 +32,74 @@ note __all__: [`Worker.run()`](https://github.com/temporalio/sdk-core/blob/492d6
 Wf Activations polling loop -> sdk-core: `poll_workflow_activation`
 
 note sdk-core:
-[`poll_workflow_activation()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/mod.rs#L89)
+[`poll_workflow_activation()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/mod.rs#L90)
 
-[`next_workflow_activation()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/mod.rs#L269)
+[`next_workflow_activation()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/workflow/mod.rs#L270)
 
 
 
 note Wf Activations polling loop:
 receive activation from server:  
-[`Worker.workflow_activation_handler`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L296)
+[`Worker.workflow_activation_handler`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L297)
 
 note:Activation is for a new workflow execution:  
-[create `WorkflowFuture`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L406)
+[create `WorkflowFuture`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L407)
 and
-[send](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L302) it to stream processor for submission to Tokio.
+[send](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L303) it to stream processor for submission to Tokio.
 
 note WorkflowFuture:
-[`start_workflow()`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L456)  
+[`start_workflow()`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L457)  
 
 WorkflowFuture -> WorkflowFunction: create
-note WorkflowFunction: [Create](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L65) a `WorkflowFunction` future by calling the user's async workflow function containing:
+note WorkflowFunction: [Create](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L66) a `WorkflowFunction` future by calling the user's async workflow function containing:
 - a `WfContext` instance, with  
   - an `incoming_commands` send handle.
 
-note WorkflowFuture:[Create](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L60) a `WorkflowFuture` containing:
+note WorkflowFuture:[Create](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L61) a `WorkflowFuture` containing:
 - the `WorkflowFunction` future 
 - `incoming_commands` receive handle
 - `incoming_activations` receive handle
 - `outgoing_completions` send handle
 
-The `incoming_activations` send handle is [stored](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L229) in `Worker.workflows`.
+The `incoming_activations` send handle is [stored](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L230) in `Worker.workflows`.
 
-The `outgoing_completions` receive handle is [stored](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L229) in a completions stream processor which calls sdk-core.
+The `outgoing_completions` receive handle is [stored](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L230) in a completions stream processor which calls sdk-core.
 
 note Wf Activations polling loop:
-[send](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L425) activation to Wf future incoming activations channel.
+[send](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L426) activation to Wf future incoming activations channel.
 
 Wf Activations polling loop -> WorkflowFuture:
 
 
-note WorkflowFuture: **Tokio** →  [`poll()`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L440)
+note WorkflowFuture: **Tokio** →  [`poll()`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L441)
 
 1. For every job in the activation:
-[`handle_job(job)`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L468)  
-(available [job variants](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/target/aarch64-apple-darwin/debug/build/temporal-sdk-core-protos-5d18df293f12871d/out/coresdk.workflow_activation.rs#L55))  
+[`handle_job(job)`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L469)  
+(available [job variants](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/target/aarch64-apple-darwin/debug/build/temporal-sdk-core-protos-5d18df293f12871d/out/coresdk.workflow_activation.rs#L56))  
 
-  job: [StartWorkflow](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L158) (`handle_job` is a no-op)  
+  job: [StartWorkflow](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L159) (`handle_job` is a no-op)  
   
 
-2. [Advance](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L488) Workflow function 
+2. [Advance](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L489) Workflow function 
 
 
 WorkflowFuture -> WorkflowFunction: `poll()`
 note WorkflowFunction:Workflow code reaches an activity call:
-[`ctx.activity(activity_opts).await`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_context.rs#L204)
+[`ctx.activity(activity_opts).await`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_context.rs#L205)
 
 In `ctx.activity` we do two things:
 
-1. Send a `ScheduleActivity` [command](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/target/aarch64-apple-darwin/debug/build/temporal-sdk-core-protos-5d18df293f12871d/out/coresdk.workflow_commands.rs#L23) to the `WorkflowFuture`, using our `incoming_commands` send handle. The command contains the [send end](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_context.rs#L439) of an `unblocker` channel.
+1. Send a `ScheduleActivity` [command](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/target/aarch64-apple-darwin/debug/build/temporal-sdk-core-protos-5d18df293f12871d/out/coresdk.workflow_commands.rs#L24) to the `WorkflowFuture`, using our `incoming_commands` send handle. The command contains the [send end](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_context.rs#L440) of an `unblocker` channel.
 
 WorkflowFunction -> WorkflowFuture: `ScheduleActivity` command
 
-note WorkflowFuture:3. For every `incoming_command`, [add an entry](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L362) to `command_status` containing the `unblocker` for the command.
+note WorkflowFuture:3. For every `incoming_command`, [add an entry](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L363) to `command_status` containing the `unblocker` for the command.
 
 
-4. [send](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L507) the list of commands to `outgoing_completions`.  
-  (available [command variants](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/target/aarch64-apple-darwin/debug/build/temporal-sdk-core-protos-5d18df293f12871d/out/coresdk.workflow_commands.rs#L23))
+4. [send](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L508) the list of commands to `outgoing_completions`.  
+  (available [command variants](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/target/aarch64-apple-darwin/debug/build/temporal-sdk-core-protos-5d18df293f12871d/out/coresdk.workflow_commands.rs#L24))
 
-  This results in a `WorkflowActivationCompletion` proto being [sent](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L273) to the server by sdk-core
+  This results in a `WorkflowActivationCompletion` proto being [sent](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L274) to the server by sdk-core
 WorkflowFuture -> sdk-core: `complete_workflow_activation`
 
 note WorkflowFunction:2. Return a `WFCommandFut`, to be awaited in the workflow code. The future contains the receive end of the `unblocker` channel.
@@ -110,21 +110,21 @@ note __all__: **TODO**: activity task is received, activity is called, resulting
 Activity task polling loop -> sdk-core: `poll_activity_task`
 
 note Activity task polling loop:
-[`activity_task_handler`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/sdk/src/lib.rs#L325)
+[`activity_task_handler`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/sdk/src/lib.rs#L326)
 
-[spawn future](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/sdk/src/lib.rs#L519)
+[spawn future](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/sdk/src/lib.rs#L520)
 
 note ActivityFuture: **Tokio** → poll  
 
-[await activity fn](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/sdk/src/lib.rs#L520)  
+[await activity fn](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/sdk/src/lib.rs#L521)  
 
-[`complete_activity_task(result)`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/sdk/src/lib.rs#L547)
+[`complete_activity_task(result)`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/sdk/src/lib.rs#L548)
 
 ActivityFuture -> sdk-core: 
 
 note sdk-core:
-[`complete_activity(status)`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/mod.rs#L127)  
-[`WorkerActivityTasks.complete()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/activities.rs#L300)
+[`complete_activity(status)`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/mod.rs#L128)  
+[`WorkerActivityTasks.complete()`](https://github.com/temporalio/sdk-core/blob/6d04c20150d518f6b9ea5c18479d42d3a13d9085/core/src/worker/activities.rs#L301)
 
 
 ...:
@@ -132,38 +132,39 @@ _:
 
 note Wf Activations polling loop:
 receive activation from server:  
-[`Worker.workflow_activation_handler`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L296)
+[`Worker.workflow_activation_handler`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L297)
 
 
 note Wf Activations polling loop:
-[send](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L425) activation to Wf future incoming activations channel.
+[send](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L426) activation to Wf future incoming activations channel.
 
 Wf Activations polling loop -> WorkflowFuture:
 
-note WorkflowFuture:**Tokio** →  [`poll()`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L440)
+note WorkflowFuture:**Tokio** →  [`poll()`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L441)
 
 1. For every job in the activation:
-[`handle_job()`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L468)  
-(available [job variants](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/target/aarch64-apple-darwin/debug/build/temporal-sdk-core-protos-5d18df293f12871d/out/coresdk.workflow_activation.rs#L55))  
+[`handle_job()`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L469)  
+(available [job variants](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/target/aarch64-apple-darwin/debug/build/temporal-sdk-core-protos-5d18df293f12871d/out/coresdk.workflow_activation.rs#L56))  
 
 
-job: [`ResolveActivity(id, result)`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L164)
+job: [`ResolveActivity(id, result)`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L165)
 
-`handle_job()` calls [`unblock()`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L116), and sends `UnblockEvent::Activity(result)` to the `unblocker` (which had been stored in `command_status`)
+`handle_job()` calls [`unblock()`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L117), and sends `UnblockEvent::Activity(result)` to the `unblocker` (which had been stored in `command_status`)
 
 WorkflowFuture -> WorkflowFunction: `UnblockEvent::Activity(result)`
 
 note WorkflowFuture:
-2. [Advance](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L488) Workflow function 
+2. [Advance](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_future.rs#L489) Workflow function 
 
 
 WorkflowFuture -> WorkflowFunction: `poll()`
 
 note WorkflowFunction:Recall that the workflow function is awaiting on `ctx.activity(act)`, and that this returns a `WFCommandFut`.
 
-The [`WFCommandFut.poll()`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_context.rs#L458) implementation handles the `UnblockEvent::Activity` by `take`-ing the `other_dat` (TODO: significance?) and calling [`Unblockable::unblock()`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L616), the result of which is to return `Poll::Ready(act_result)`.
+The [`WFCommandFut.poll()`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/workflow_context.rs#L459) implementation handles the `UnblockEvent::Activity` by `take`-ing the `other_dat` (TODO: significance?) and calling [`Unblockable::unblock()`](https://github.com/temporalio/sdk-core/blob/492d687be48ce6ee81ef7d55c825d366c1e3c4c5/sdk/src/lib.rs#L617), the result of which is to return `Poll::Ready(act_result)`.
 
 The workflow function thus advances beyond the activity call.
 
 
 order: Wf Activations polling loop, WorkflowFuture, WorkflowFunction, Activity task polling loop, ActivityFuture, sdk-core
+
