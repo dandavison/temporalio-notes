@@ -1,0 +1,239 @@
+
+service\.history\.ndc.backfillWorkflowEventsReapply -> service\.history\.ndc.ReapplyEvents # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager.go:305:35-48
+service\.history\.api\.reapplyevents.Invoke -> service\.history\.ndc.ReapplyEvents # /Users/dan/src/temporalio/temporal/service/history/api/reapplyevents/api.go:178:44-57
+service\.history\.ndc.ReapplyEvents -> service\.history\.ndc.ReapplyEvents # /Users/dan/src/temporalio/temporal/service/history/ndc/events_reapplier_mock.go:75:116-129
+service\.history\.ndc.BackfillWorkflow -> service\.history\.ndc.backfillWorkflowEventsReapply # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager.go:254:42-71
+service\.history.ReapplyEvents -> service\.history\.api\.reapplyevents.Invoke # /Users/dan/src/temporalio/temporal/service/history/history_engine.go:825:23-29
+service\.history\.ndc.applyNonStartEventsToNonCurrentBranchWithoutContinueAsNew -> service\.history\.ndc.BackfillWorkflow # /Users/dan/src/temporalio/temporal/service/history/ndc/history_replicator.go:511:25-41
+service\.history.ReapplyEvents -> service\.history.ReapplyEvents # /Users/dan/src/temporalio/temporal/service/history/handler.go:1682:19-32
+service\.history\.workflow.ReapplyEvents -> service\.history.ReapplyEvents # /Users/dan/src/temporalio/temporal/service/history/workflow/context.go:816:17-30
+service\.history\.ndc.applyNonStartEventsToNonCurrentBranch -> service\.history\.ndc.applyNonStartEventsToNonCurrentBranchWithoutContinueAsNew # /Users/dan/src/temporalio/temporal/service/history/ndc/history_replicator.go:463:11-68
+service\.history\.ndc.doApplyEvents -> service\.history\.ndc.applyNonStartEventsToNonCurrentBranch # /Users/dan/src/temporalio/temporal/service/history/ndc/history_replicator.go:317:13-50
+service\.history\.ndc.createAsZombie -> service\.history\.workflow.ReapplyEvents # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_new_workflow.go:231:40-53
+service\.history\.workflow.updateWorkflowExecutionEventReapply -> service\.history\.workflow.ReapplyEvents # /Users/dan/src/temporalio/temporal/service/history/workflow/context.go:740:11-24
+service\.history\.workflow.conflictResolveEventReapply -> service\.history\.workflow.ReapplyEvents # /Users/dan/src/temporalio/temporal/service/history/workflow/context.go:758:11-24
+service\.history\.ndc.backfillWorkflowEventsReapply -> service\.history\.workflow.ReapplyEvents # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager.go:371:40-53
+api\.historyservice\.v1._HistoryService_ReapplyEvents_Handler -> service\.history.ReapplyEvents # /Users/dan/src/temporalio/temporal/api/historyservice/v1/service_grpc.pb.go:1973:37-50
+api\.historyservice\.v1._HistoryService_ReapplyEvents_Handler -> service\.history.ReapplyEvents # /Users/dan/src/temporalio/temporal/api/historyservice/v1/service_grpc.pb.go:1980:37-50
+service\.history\.ndc.ReplicateHistoryEvents -> service\.history\.ndc.doApplyEvents # /Users/dan/src/temporalio/temporal/service/history/ndc/history_replicator.go:248:11-24
+service\.history\.ndc.applyNonStartEventsToNonCurrentBranchWithContinueAsNew -> service\.history\.ndc.doApplyEvents # /Users/dan/src/temporalio/temporal/service/history/ndc/history_replicator.go:556:14-27
+service\.history\.ndc.ApplyEvents -> service\.history\.ndc.doApplyEvents # /Users/dan/src/temporalio/temporal/service/history/ndc/history_replicator.go:224:11-24
+service\.history\.ndc.executeTransaction -> service\.history\.ndc.createAsZombie # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_new_workflow.go:316:12-26
+service\.history\.workflow.UpdateWorkflowExecutionWithNew -> service\.history\.workflow.updateWorkflowExecutionEventReapply # /Users/dan/src/temporalio/temporal/service/history/workflow/context.go:614:14-49
+service\.history\.workflow.ConflictResolveWorkflowExecution -> service\.history\.workflow.conflictResolveEventReapply # /Users/dan/src/temporalio/temporal/service/history/workflow/context.go:426:14-41
+api\.historyservice\.v1.historyservice -> api\.historyservice\.v1._HistoryService_ReapplyEvents_Handler # /Users/dan/src/temporalio/temporal/api/historyservice/v1/service_grpc.pb.go:2532:16-53
+service\.history\.ndc.applyNonStartEventsToNonCurrentBranch -> service\.history\.ndc.applyNonStartEventsToNonCurrentBranchWithContinueAsNew # /Users/dan/src/temporalio/temporal/service/history/ndc/history_replicator.go:455:12-66
+service\.history\.ndc.dispatchForNewWorkflow -> service\.history\.ndc.executeTransaction # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_new_workflow.go:98:12-30
+service\.history\.ndc.conflictResolveAsZombie -> service\.history\.workflow.ConflictResolveWorkflowExecution # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:457:37-69
+service\.history\.ndc.suppressCurrentAndUpdateAsCurrent -> service\.history\.workflow.ConflictResolveWorkflowExecution # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:348:37-69
+service\.history\.ndc.conflictResolveAsCurrent -> service\.history\.workflow.ConflictResolveWorkflowExecution # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:380:37-69
+service\.history.ReplicateEventsV2 -> service\.history\.ndc.ApplyEvents # /Users/dan/src/temporalio/temporal/service/history/history_engine.go:648:32-43
+service\.history.ReplicateHistoryEvents -> service\.history\.ndc.ReplicateHistoryEvents # /Users/dan/src/temporalio/temporal/service/history/history_engine.go:659:32-54
+service\.history\.ndc.SyncActivityState -> service\.history\.workflow.UpdateWorkflowExecutionWithNew # /Users/dan/src/temporalio/temporal/service/history/ndc/activity_state_replicator.go:173:26-56
+service\.history\.ndc.SyncActivitiesState -> service\.history\.workflow.UpdateWorkflowExecutionWithNew # /Users/dan/src/temporalio/temporal/service/history/ndc/activity_state_replicator.go:256:26-56
+service\.history\.ndc.suppressCurrentAndCreateAsCurrent -> service\.history\.workflow.UpdateWorkflowExecutionWithNew # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_new_workflow.go:280:38-68
+service\.history\.workflow.UpdateWorkflowExecutionAsActive -> service\.history\.workflow.UpdateWorkflowExecutionWithNew # /Users/dan/src/temporalio/temporal/service/history/workflow/context.go:485:10-40
+service\.history\.ndc.BackfillWorkflow -> service\.history\.workflow.UpdateWorkflowExecutionWithNew # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager.go:263:37-67
+service\.history\.ndc.updateAsZombie -> service\.history\.workflow.UpdateWorkflowExecutionWithNew # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:303:37-67
+service\.history\.workflow.UpdateWorkflowExecutionWithNewAsActive -> service\.history\.workflow.UpdateWorkflowExecutionWithNew # /Users/dan/src/temporalio/temporal/service/history/workflow/context.go:521:11-41
+service\.history\.workflow.UpdateWorkflowExecutionAsPassive -> service\.history\.workflow.UpdateWorkflowExecutionWithNew # /Users/dan/src/temporalio/temporal/service/history/workflow/context.go:537:11-41
+service\.history\.workflow.UpdateWorkflowExecutionWithNewAsPassive -> service\.history\.workflow.UpdateWorkflowExecutionWithNew # /Users/dan/src/temporalio/temporal/service/history/workflow/context.go:555:11-41
+service\.history\.ndc.CreateWorkflow -> service\.history\.ndc.dispatchForNewWorkflow # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager.go:208:21-43
+service\.history\.ndc.executeTransaction -> service\.history\.ndc.suppressCurrentAndUpdateAsCurrent # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:506:12-45
+service\.history\.ndc.executeTransaction -> service\.history\.ndc.conflictResolveAsZombie # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:521:12-35
+service\.history\.ndc.executeTransaction -> service\.history\.ndc.conflictResolveAsCurrent # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:514:12-36
+service\.history.ReplicateEventsV2 -> service\.history.ReplicateEventsV2 # /Users/dan/src/temporalio/temporal/service/history/handler.go:1392:17-34
+service\.history\.ndc.executeTransaction -> service\.history\.ndc.suppressCurrentAndCreateAsCurrent # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_new_workflow.go:323:12-45
+service\.history\.ndc.executeTransaction -> service\.history\.ndc.updateAsZombie # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:498:12-26
+service\.history.SyncActivities -> service\.history\.ndc.SyncActivitiesState # /Users/dan/src/temporalio/temporal/service/history/history_engine.go:680:38-57
+service\.history.SyncActivity -> service\.history\.ndc.SyncActivityState # /Users/dan/src/temporalio/temporal/service/history/history_engine.go:673:38-55
+service\.history\.api.UpdateWorkflowWithNew -> service\.history\.workflow.UpdateWorkflowExecutionWithNewAsActive # /Users/dan/src/temporalio/temporal/service/history/api/update_workflow_util.go:106:42-80
+service\.history.executeWorkflowTimeoutTask -> service\.history\.workflow.UpdateWorkflowExecutionWithNewAsActive # /Users/dan/src/temporalio/temporal/service/history/timer_queue_active_task_executor.go:616:19-57
+service\.history.handleWorkflowTaskCompleted -> service\.history\.workflow.UpdateWorkflowExecutionWithNewAsActive # /Users/dan/src/temporalio/temporal/service/history/workflow_task_handler_callbacks.go:802:25-63
+service\.history\.ndc.commit -> service\.history\.ndc.CreateWorkflow # /Users/dan/src/temporalio/temporal/service/history/ndc/history_importer.go:362:30-44
+service\.history\.ndc.applyStartEvents -> service\.history\.ndc.CreateWorkflow # /Users/dan/src/temporalio/temporal/service/history/ndc/history_replicator.go:365:25-39
+service\.history\.ndc.applyNonStartEventsResetWorkflow -> service\.history\.ndc.CreateWorkflow # /Users/dan/src/temporalio/temporal/service/history/ndc/history_replicator.go:661:25-39
+service\.history\.ndc.SyncWorkflowState -> service\.history\.ndc.CreateWorkflow # /Users/dan/src/temporalio/temporal/service/history/ndc/workflow_state_replicator.go:248:26-40
+service\.history\.ndc.dispatchForExistingWorkflow -> service\.history\.ndc.executeTransaction # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:161:11-29
+service\.history\.ndc.dispatchWorkflowUpdateAsCurrent -> service\.history\.ndc.executeTransaction # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:178:12-30
+service\.history\.ndc.dispatchWorkflowUpdateAsZombie -> service\.history\.ndc.executeTransaction # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:205:12-30
+service\.history\.ndc.updateAsCurrent -> service\.history\.workflow.UpdateWorkflowExecutionWithNewAsPassive # /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:233:37-76
+service\.history\.workflow.LoadMutableState -> service\.history\.workflow.UpdateWorkflowExecutionAsActive # /Users/dan/src/temporalio/temporal/service/history/workflow/context.go:289:13-44
+service\.history.handleWorkflowTaskCompleted -> service\.history\.workflow.UpdateWorkflowExecutionAsActive # /Users/dan/src/temporalio/temporal/service/history/workflow_task_handler_callbacks.go:823:26-57
+service\.history\.api\.signalwithstartworkflow.signalWorkflow -> service\.history\.workflow.UpdateWorkflowExecutionAsActive # /Users/dan/src/temporalio/temporal/service/history/api/signalwithstartworkflow/signal_with_start_workflow.go:312:38-69
+service\.history\.api.UpdateWorkflowWithNew -> service\.history\.workflow.UpdateWorkflowExecutionAsActive # /Users/dan/src/temporalio/temporal/service/history/api/update_workflow_util.go:113:42-73
+service\.history\.ndc.flush -> service\.history\.workflow.UpdateWorkflowExecutionAsActive # /Users/dan/src/temporalio/temporal/service/history/ndc/buffer_event_flusher.go:101:35-66
+service\.history.updateWorkflowExecution -> service\.history\.workflow.UpdateWorkflowExecutionAsActive # /Users/dan/src/temporalio/temporal/service/history/timer_queue_active_task_executor.go:654:17-48
+service\.history.updateWorkflowExecution -> service\.history\.workflow.UpdateWorkflowExecutionAsActive # /Users/dan/src/temporalio/temporal/service/history/transfer_queue_active_task_executor.go:1235:17-48
+
+service\.history\.ndc.conflictResolveAsCurrent: |md
+	[`conflictResolveAsCurrent`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/transaction_manager_existing_workflow.go?line=363 "=> ConflictResolveWorkflowExecution: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:380:37-69&#013;&#010;")
+|
+service\.history\.ndc.applyNonStartEventsResetWorkflow: |md
+	[`applyNonStartEventsResetWorkflow`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/history_replicator.go?line=637 "=> CreateWorkflow: /Users/dan/src/temporalio/temporal/service/history/ndc/history_replicator.go:661:25-39&#013;&#010;")
+|
+service\.history.executeWorkflowTimeoutTask: |md
+	[`executeWorkflowTimeoutTask`](https://github.com/temporalio/temporal/blob/main/service/history/timer_queue_active_task_executor.go?line=507 "=> UpdateWorkflowExecutionWithNewAsActive: /Users/dan/src/temporalio/temporal/service/history/timer_queue_active_task_executor.go:616:19-57&#013;&#010;")
+|
+service\.history\.ndc.dispatchWorkflowUpdateAsCurrent: |md
+	[`dispatchWorkflowUpdateAsCurrent`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/transaction_manager_existing_workflow.go?line=170 "=> executeTransaction: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:178:12-30&#013;&#010;")
+|
+service\.history\.api\.signalwithstartworkflow.signalWorkflow: |md
+	[`signalWorkflow`](https://github.com/temporalio/temporal/blob/main/service/history/api/signalwithstartworkflow/signal_with_start_workflow.go?line=262 "=> UpdateWorkflowExecutionAsActive: /Users/dan/src/temporalio/temporal/service/history/api/signalwithstartworkflow/signal_with_start_workflow.go:312:38-69&#013;&#010;")
+|
+service\.history\.workflow.ReapplyEvents: |md
+	[`ReapplyEvents`](https://github.com/temporalio/temporal/blob/main/service/history/workflow/context.go?line=761 "=> ReapplyEvents: /Users/dan/src/temporalio/temporal/service/history/workflow/context.go:816:17-30&#013;&#010;")
+|
+service\.history.ReplicateEventsV2: |md
+	[`ReplicateEventsV2`](https://github.com/temporalio/temporal/blob/main/service/history/history_engine.go?line=644 "=> ApplyEvents: /Users/dan/src/temporalio/temporal/service/history/history_engine.go:648:32-43&#013;&#010;")
+|
+service\.history\.workflow.ConflictResolveWorkflowExecution: |md
+	[`ConflictResolveWorkflowExecution`](https://github.com/temporalio/temporal/blob/main/service/history/workflow/context.go?line=363 "=> conflictResolveEventReapply: /Users/dan/src/temporalio/temporal/service/history/workflow/context.go:426:14-41&#013;&#010;")
+|
+service\.history\.ndc.conflictResolveAsZombie: |md
+	[`conflictResolveAsZombie`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/transaction_manager_existing_workflow.go?line=395 "=> ConflictResolveWorkflowExecution: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:457:37-69&#013;&#010;")
+|
+service\.history\.workflow.UpdateWorkflowExecutionWithNewAsPassive: |md
+	[`UpdateWorkflowExecutionWithNewAsPassive`](https://github.com/temporalio/temporal/blob/main/service/history/workflow/context.go?line=548 "=> UpdateWorkflowExecutionWithNew: /Users/dan/src/temporalio/temporal/service/history/workflow/context.go:555:11-41&#013;&#010;")
+|
+service\.history.updateWorkflowExecution: |md
+	[`updateWorkflowExecution`](https://github.com/temporalio/temporal/blob/main/service/history/timer_queue_active_task_executor.go?line=640 "=> UpdateWorkflowExecutionAsActive: /Users/dan/src/temporalio/temporal/service/history/timer_queue_active_task_executor.go:654:17-48&#013;&#010;")
+|
+service\.history\.ndc.applyNonStartEventsToNonCurrentBranchWithContinueAsNew: |md
+	[`applyNonStartEventsToNonCurrentBranchWithContinueAsNew`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/history_replicator.go?line=531 "=> doApplyEvents: /Users/dan/src/temporalio/temporal/service/history/ndc/history_replicator.go:556:14-27&#013;&#010;")
+|
+service\.history\.ndc.executeTransaction: |md
+	[`executeTransaction`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/transaction_manager_new_workflow.go?line=291 "=> createAsZombie: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_new_workflow.go:316:12-26&#013;&#010;=> suppressCurrentAndCreateAsCurrent: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_new_workflow.go:323:12-45&#013;&#010;")
+|
+service\.history\.ndc.updateAsCurrent: |md
+	[`updateAsCurrent`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/transaction_manager_existing_workflow.go?line=223 "=> UpdateWorkflowExecutionWithNewAsPassive: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:233:37-76&#013;&#010;")
+|
+service\.history\.ndc.ReapplyEvents: |md
+	[`ReapplyEvents`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/events_reapplier_mock.go?line=73 "=> ReapplyEvents: /Users/dan/src/temporalio/temporal/service/history/ndc/events_reapplier_mock.go:75:116-129&#013;&#010;")
+|
+service\.history\.ndc.BackfillWorkflow: |md
+	[`BackfillWorkflow`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/transaction_manager.go?line=229 "=> backfillWorkflowEventsReapply: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager.go:254:42-71&#013;&#010;=> UpdateWorkflowExecutionWithNew: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager.go:263:37-67&#013;&#010;")
+|
+service\.history\.ndc.SyncActivitiesState: |md
+	[`SyncActivitiesState`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/activity_state_replicator.go?line=184 "=> UpdateWorkflowExecutionWithNew: /Users/dan/src/temporalio/temporal/service/history/ndc/activity_state_replicator.go:256:26-56&#013;&#010;")
+|
+service\.history.ReapplyEvents: |md
+	[`ReapplyEvents`](https://github.com/temporalio/temporal/blob/main/service/history/history_engine.go?line=818 "=> Invoke: /Users/dan/src/temporalio/temporal/service/history/history_engine.go:825:23-29&#013;&#010;")
+|
+service\.history\.ndc.applyNonStartEventsToNonCurrentBranch: |md
+	[`applyNonStartEventsToNonCurrentBranch`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/history_replicator.go?line=445 "=> applyNonStartEventsToNonCurrentBranchWithoutContinueAsNew: /Users/dan/src/temporalio/temporal/service/history/ndc/history_replicator.go:463:11-68&#013;&#010;=> applyNonStartEventsToNonCurrentBranchWithContinueAsNew: /Users/dan/src/temporalio/temporal/service/history/ndc/history_replicator.go:455:12-66&#013;&#010;")
+|
+service\.history\.api.UpdateWorkflowWithNew: |md
+	[`UpdateWorkflowWithNew`](https://github.com/temporalio/temporal/blob/main/service/history/api/update_workflow_util.go?line=62 "=> UpdateWorkflowExecutionWithNewAsActive: /Users/dan/src/temporalio/temporal/service/history/api/update_workflow_util.go:106:42-80&#013;&#010;=> UpdateWorkflowExecutionAsActive: /Users/dan/src/temporalio/temporal/service/history/api/update_workflow_util.go:113:42-73&#013;&#010;")
+|
+service\.history.handleWorkflowTaskCompleted: |md
+	[`handleWorkflowTaskCompleted`](https://github.com/temporalio/temporal/blob/main/service/history/workflow_task_handler_callbacks.go?line=440 "=> UpdateWorkflowExecutionWithNewAsActive: /Users/dan/src/temporalio/temporal/service/history/workflow_task_handler_callbacks.go:802:25-63&#013;&#010;=> UpdateWorkflowExecutionAsActive: /Users/dan/src/temporalio/temporal/service/history/workflow_task_handler_callbacks.go:823:26-57&#013;&#010;")
+|
+service\.history.updateWorkflowExecution: |md
+	[`updateWorkflowExecution`](https://github.com/temporalio/temporal/blob/main/service/history/transfer_queue_active_task_executor.go?line=1212 "=> UpdateWorkflowExecutionAsActive: /Users/dan/src/temporalio/temporal/service/history/transfer_queue_active_task_executor.go:1235:17-48&#013;&#010;")
+|
+service\.history\.ndc.dispatchForNewWorkflow: |md
+	[`dispatchForNewWorkflow`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/transaction_manager_new_workflow.go?line=71 "=> executeTransaction: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_new_workflow.go:98:12-30&#013;&#010;")
+|
+service\.history\.ndc.executeTransaction: |md
+	[`executeTransaction`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/transaction_manager_existing_workflow.go?line=472 "=> suppressCurrentAndUpdateAsCurrent: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:506:12-45&#013;&#010;=> conflictResolveAsZombie: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:521:12-35&#013;&#010;=> conflictResolveAsCurrent: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:514:12-36&#013;&#010;=> updateAsZombie: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:498:12-26&#013;&#010;")
+|
+service\.history\.ndc.createAsZombie: |md
+	[`createAsZombie`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/transaction_manager_new_workflow.go?line=203 "=> ReapplyEvents: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_new_workflow.go:231:40-53&#013;&#010;")
+|
+service\.history\.ndc.dispatchForExistingWorkflow: |md
+	[`dispatchForExistingWorkflow`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/transaction_manager_existing_workflow.go?line=73 "=> executeTransaction: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:161:11-29&#013;&#010;")
+|
+service\.history\.ndc.CreateWorkflow: |md
+	[`CreateWorkflow`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/transaction_manager.go?line=203 "=> dispatchForNewWorkflow: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager.go:208:21-43&#013;&#010;")
+|
+service\.history\.ndc.flush: |md
+	[`flush`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/buffer_event_flusher.go?line=75 "=> UpdateWorkflowExecutionAsActive: /Users/dan/src/temporalio/temporal/service/history/ndc/buffer_event_flusher.go:101:35-66&#013;&#010;")
+|
+service\.history\.workflow.updateWorkflowExecutionEventReapply: |md
+	[`updateWorkflowExecutionEventReapply`](https://github.com/temporalio/temporal/blob/main/service/history/workflow/context.go?line=725 "=> ReapplyEvents: /Users/dan/src/temporalio/temporal/service/history/workflow/context.go:740:11-24&#013;&#010;")
+|
+service\.history\.ndc.suppressCurrentAndCreateAsCurrent: |md
+	[`suppressCurrentAndCreateAsCurrent`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/transaction_manager_new_workflow.go?line=264 "=> UpdateWorkflowExecutionWithNew: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_new_workflow.go:280:38-68&#013;&#010;")
+|
+service\.history.SyncActivities: |md
+	[`SyncActivities`](https://github.com/temporalio/temporal/blob/main/service/history/history_engine.go?line=676 "=> SyncActivitiesState: /Users/dan/src/temporalio/temporal/service/history/history_engine.go:680:38-57&#013;&#010;")
+|
+service\.history\.ndc.applyStartEvents: |md
+	[`applyStartEvents`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/history_replicator.go?line=335 "=> CreateWorkflow: /Users/dan/src/temporalio/temporal/service/history/ndc/history_replicator.go:365:25-39&#013;&#010;")
+|
+service\.history\.ndc.backfillWorkflowEventsReapply: |md
+	[`backfillWorkflowEventsReapply`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/transaction_manager.go?line=274 "=> ReapplyEvents: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager.go:305:35-48&#013;&#010;=> ReapplyEvents: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager.go:371:40-53&#013;&#010;")
+|
+service\.history\.ndc.SyncActivityState: |md
+	[`SyncActivityState`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/activity_state_replicator.go?line=92 "=> UpdateWorkflowExecutionWithNew: /Users/dan/src/temporalio/temporal/service/history/ndc/activity_state_replicator.go:173:26-56&#013;&#010;")
+|
+service\.history\.ndc.suppressCurrentAndUpdateAsCurrent: |md
+	[`suppressCurrentAndUpdateAsCurrent`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/transaction_manager_existing_workflow.go?line=314 "=> ConflictResolveWorkflowExecution: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:348:37-69&#013;&#010;")
+|
+service\.history.ReapplyEvents: |md
+	[`ReapplyEvents`](https://github.com/temporalio/temporal/blob/main/service/history/handler.go?line=1653 "=> ReapplyEvents: /Users/dan/src/temporalio/temporal/service/history/handler.go:1682:19-32&#013;&#010;")
+|
+service\.history\.ndc.ApplyEvents: |md
+	[`ApplyEvents`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/history_replicator.go?line=209 "=> doApplyEvents: /Users/dan/src/temporalio/temporal/service/history/ndc/history_replicator.go:224:11-24&#013;&#010;")
+|
+service\.history\.workflow.UpdateWorkflowExecutionWithNewAsActive: |md
+	[`UpdateWorkflowExecutionWithNewAsActive`](https://github.com/temporalio/temporal/blob/main/service/history/workflow/context.go?line=514 "=> UpdateWorkflowExecutionWithNew: /Users/dan/src/temporalio/temporal/service/history/workflow/context.go:521:11-41&#013;&#010;")
+|
+service\.history.ReplicateEventsV2: |md
+	[`ReplicateEventsV2`](https://github.com/temporalio/temporal/blob/main/service/history/handler.go?line=1364 "=> ReplicateEventsV2: /Users/dan/src/temporalio/temporal/service/history/handler.go:1392:17-34&#013;&#010;")
+|
+service\.history\.ndc.doApplyEvents: |md
+	[`doApplyEvents`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/history_replicator.go?line=251 "=> applyNonStartEventsToNonCurrentBranch: /Users/dan/src/temporalio/temporal/service/history/ndc/history_replicator.go:317:13-50&#013;&#010;")
+|
+api\.historyservice\.v1._HistoryService_ReapplyEvents_Handler: |md
+	[`_HistoryService_ReapplyEvents_Handler`](https://github.com/temporalio/temporal/blob/main/api/historyservice/v1/service_grpc.pb.go?line=1967 "=> ReapplyEvents: /Users/dan/src/temporalio/temporal/api/historyservice/v1/service_grpc.pb.go:1973:37-50&#013;&#010;=> ReapplyEvents: /Users/dan/src/temporalio/temporal/api/historyservice/v1/service_grpc.pb.go:1980:37-50&#013;&#010;")
+|
+service\.history\.ndc.SyncWorkflowState: |md
+	[`SyncWorkflowState`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/workflow_state_replicator.go?line=99 "=> CreateWorkflow: /Users/dan/src/temporalio/temporal/service/history/ndc/workflow_state_replicator.go:248:26-40&#013;&#010;")
+|
+service\.history\.ndc.ReplicateHistoryEvents: |md
+	[`ReplicateHistoryEvents`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/history_replicator.go?line=227 "=> doApplyEvents: /Users/dan/src/temporalio/temporal/service/history/ndc/history_replicator.go:248:11-24&#013;&#010;")
+|
+service\.history\.ndc.updateAsZombie: |md
+	[`updateAsZombie`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/transaction_manager_existing_workflow.go?line=241 "=> UpdateWorkflowExecutionWithNew: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:303:37-67&#013;&#010;")
+|
+service\.history.ReplicateHistoryEvents: |md
+	[`ReplicateHistoryEvents`](https://github.com/temporalio/temporal/blob/main/service/history/history_engine.go?line=651 "=> ReplicateHistoryEvents: /Users/dan/src/temporalio/temporal/service/history/history_engine.go:659:32-54&#013;&#010;")
+|
+service\.history\.workflow.UpdateWorkflowExecutionAsPassive: |md
+	[`UpdateWorkflowExecutionAsPassive`](https://github.com/temporalio/temporal/blob/main/service/history/workflow/context.go?line=532 "=> UpdateWorkflowExecutionWithNew: /Users/dan/src/temporalio/temporal/service/history/workflow/context.go:537:11-41&#013;&#010;")
+|
+service\.history.SyncActivity: |md
+	[`SyncActivity`](https://github.com/temporalio/temporal/blob/main/service/history/history_engine.go?line=669 "=> SyncActivityState: /Users/dan/src/temporalio/temporal/service/history/history_engine.go:673:38-55&#013;&#010;")
+|
+service\.history\.ndc.applyNonStartEventsToNonCurrentBranchWithoutContinueAsNew: |md
+	[`applyNonStartEventsToNonCurrentBranchWithoutContinueAsNew`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/history_replicator.go?line=473 "=> BackfillWorkflow: /Users/dan/src/temporalio/temporal/service/history/ndc/history_replicator.go:511:25-41&#013;&#010;")
+|
+api\.historyservice\.v1.historyservice: |md
+	[`historyservice`](https://github.com/temporalio/temporal/blob/main/api/historyservice/v1/service_grpc.pb.go?line=29 "=> _HistoryService_ReapplyEvents_Handler: /Users/dan/src/temporalio/temporal/api/historyservice/v1/service_grpc.pb.go:2532:16-53&#013;&#010;")
+|
+service\.history\.workflow.UpdateWorkflowExecutionAsActive: |md
+	[`UpdateWorkflowExecutionAsActive`](https://github.com/temporalio/temporal/blob/main/service/history/workflow/context.go?line=460 "=> UpdateWorkflowExecutionWithNew: /Users/dan/src/temporalio/temporal/service/history/workflow/context.go:485:10-40&#013;&#010;")
+|
+service\.history\.ndc.dispatchWorkflowUpdateAsZombie: |md
+	[`dispatchWorkflowUpdateAsZombie`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/transaction_manager_existing_workflow.go?line=196 "=> executeTransaction: /Users/dan/src/temporalio/temporal/service/history/ndc/transaction_manager_existing_workflow.go:205:12-30&#013;&#010;")
+|
+service\.history\.ndc.ReapplyEvents: |md
+	[`ReapplyEvents`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/events_reapplier.go?line=45 "[leaf]")
+|
+service\.history\.workflow.conflictResolveEventReapply: |md
+	[`conflictResolveEventReapply`](https://github.com/temporalio/temporal/blob/main/service/history/workflow/context.go?line=743 "=> ReapplyEvents: /Users/dan/src/temporalio/temporal/service/history/workflow/context.go:758:11-24&#013;&#010;")
+|
+service\.history\.workflow.LoadMutableState: |md
+	[`LoadMutableState`](https://github.com/temporalio/temporal/blob/main/service/history/workflow/context.go?line=249 "=> UpdateWorkflowExecutionAsActive: /Users/dan/src/temporalio/temporal/service/history/workflow/context.go:289:13-44&#013;&#010;")
+|
+service\.history\.ndc.commit: |md
+	[`commit`](https://github.com/temporalio/temporal/blob/main/service/history/ndc/history_importer.go?line=342 "=> CreateWorkflow: /Users/dan/src/temporalio/temporal/service/history/ndc/history_importer.go:362:30-44&#013;&#010;")
+|
+service\.history\.api\.reapplyevents.Invoke: |md
+	[`Invoke`](https://github.com/temporalio/temporal/blob/main/service/history/api/reapplyevents/api.go?line=46 "=> ReapplyEvents: /Users/dan/src/temporalio/temporal/service/history/api/reapplyevents/api.go:178:44-57&#013;&#010;")
+|
+service\.history\.workflow.UpdateWorkflowExecutionWithNew: |md
+	[`UpdateWorkflowExecutionWithNew`](https://github.com/temporalio/temporal/blob/main/service/history/workflow/context.go?line=566 "=> updateWorkflowExecutionEventReapply: /Users/dan/src/temporalio/temporal/service/history/workflow/context.go:614:14-49&#013;&#010;")
+|
