@@ -1,0 +1,79 @@
+shape: sequence_diagram
+c: {
+  label: Client
+  shape: person
+}
+h: {
+  label: History Service
+  shape: oval
+}
+r: {
+  label: Update Registry
+  shape: oval
+}
+ms: {
+  label: Mutable State\nUpdateInfo\n\n(in-memory)
+  shape: oval
+}
+m: {
+  label: Matching Service
+  shape: oval
+}
+db: {
+  label: DB
+  shape: cylinder
+}
+w: {
+  label: Worker
+  shape: hexagon
+}
+
+StarterRequestsUpdate: "" {
+  c.s1 -> h.s1: Request update
+  h.s1 -> r.s1: upd.Request(request)
+  r.s1."Admitted ⟹ Requested\n\nin-memory update w/ request payload"
+  h.s1 -> m.s1: Add Speculative WFT
+  h.s1 -> c.s1: ACK
+}
+
+WorkerProcessesTask: "" {
+  m.s3 -> w.s3: Speculative WFT
+  w.s3 -> h.s3: WFTCompleted\n(Accept & Complete Update)
+  r.s3."Requested ⟹ Accepted ⟹ Completed\n\nin-memory update w/ request payload"
+  ms.s3."UpdateInfo:\n\nCompleted"
+  ms.s3 -> db.s3: persist MS & events
+  db.s3.UpdateAcceptedEvent
+  db.s3.UpdateCompletedEvent
+}
+
+Reset: "" {
+  c.s4 -> h.s4: Reset Workflow
+  ms.s4."UpdateInfo:\n\nRequested"
+  ms.s4 -> db.s4: persist MS & events
+  db.s4."(new history branch!)\n\nUpdateRequestedEvent"
+}
+
+RecordWorkflowTaskStarted: "" {
+  m.s5 -> h.s5: RecordWorkflowTaskStarted
+  r.s5."empty registry\nin reset workflow context"
+  ms.s5 -> r.s5: Load registry from MS
+  r.s5."Requested"
+  h.s5 -> db.s5: persist MS & WFTScheduled event
+}
+
+*.(** -> **)[*].style: {
+  font-color: black
+  stroke: darkblue
+}
+c.style: {
+  stroke: magenta
+}
+w.style: {
+  stroke: magenta
+}
+m.style: {
+  stroke: green
+}
+db.style: {
+  stroke: black
+}
