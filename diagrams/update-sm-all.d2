@@ -1,0 +1,15 @@
+explanation: |md
+  Each state comprises 3 substates, arranged vertically. These are:
+  - `UpdateRegistry` entry
+  - mutable state `UpdateInfo` entry
+  - history events
+
+  \+ indicates that the request payload is present.
+| {near: top-left}
+
+∅\n∅\n∅\n -> Admitted\n∅\n∅: New()
+Admitted\n∅\n∅ -> Requested+\n∅\n∅: attach request payload
+Requested+\n∅\n∅ -> Sent+\n∅\n∅: Send()
+Sent+\n∅\n∅ -> Accepted+\nAccepted\nUA+: worker sends\naccept msg
+Accepted+\nAccepted\nUA+ -> Completed+\n∅\nUA+,UC: worker sends\ncomplete msg
+Sent+\n∅\n∅ -> Completed+\n∅\n∅: worker sends\nreject msg
