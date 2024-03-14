@@ -13,3 +13,15 @@ Requested+\n∅\n∅ -> Sent+\n∅\n∅: Send()
 Sent+\n∅\n∅ -> Accepted+\nAccepted\nUA+: worker sends\naccept msg
 Accepted+\nAccepted\nUA+ -> Completed+\n∅\nUA+,UC: worker sends\ncomplete msg
 Sent+\n∅\n∅ -> Completed+\n∅\n∅: worker sends\nreject msg
+
+Admitted\n∅\n∅ -> ∅\n∅\n∅\n: lose registry
+Requested+\n∅\n∅ -> ∅\n∅\n∅\n: lose registry
+Sent+\n∅\n∅ -> ∅\n∅\n∅\n: lose registry
+Accepted+\nAccepted\nUA+ -> Accepted+\nAccepted\nUA+: lose registry
+
+∅\n∅\n∅\n -> fail-wft: worker sends\naccept/reject msg
+
+fail-wft: {
+  label: ERROR\n(fail WFT)
+  style.font-color: red
+}
