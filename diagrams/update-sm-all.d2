@@ -46,3 +46,35 @@ fail-wft: {
   label: ERROR\n(fail WFT)
   style.font-color: red
 }
+
+# With reapplied updates
+Completed+ -> ReappliedR: reapply
+Accepted+ -> ReappliedR: reapply
+Rejected+ -> bug-reapply-rejected: reapply
+ReappliedR -> ReappliedRA: worker sends\naccept msg
+ReappliedRA -> ReappliedRAC: worker sends\ncomplete msg
+ReappliedRA -> ReappliedRAJ: worker sends\nreject msg
+
+# Multiple reapplies
+ReappliedR -> ReappliedR: reapply
+ReappliedRA -> ReappliedR: reapply
+ReappliedRAC -> ReappliedR: reapply
+ReappliedRAJ -> ReappliedR: reapply\n(rejected reapplied update\ncan be reapplied!)
+
+# Reapply states
+ReappliedR: {
+  label: Requested\nRequested\nUR+
+}
+ReappliedRA: {
+  label: Accepted\nAccepted\nUR+,UA
+}
+ReappliedRAC: {
+  label: Completed\nCompleted\nUR+,UA,UC
+}
+ReappliedRAJ: {
+  label: Completed\nCompleted\nUR+,UA,UJ
+}
+bug-reapply-rejected: {
+  label: TEMPORAL FLAW\n(rejected update\ncannot be reapplied)
+  style.font-color: red
+}
