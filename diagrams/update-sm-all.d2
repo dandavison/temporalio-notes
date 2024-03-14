@@ -7,20 +7,41 @@ explanation: |md
   \+ indicates that the request payload is present.
 | {near: top-left}
 
-∅\n∅\n∅\n -> Admitted\n∅\n∅: New()
-Admitted\n∅\n∅ -> Requested+\n∅\n∅: attach request payload
-Requested+\n∅\n∅ -> Sent+\n∅\n∅: Send()
-Sent+\n∅\n∅ -> Accepted+\nAccepted\nUA+: worker sends\naccept msg
-Accepted+\nAccepted\nUA+ -> Completed+\n∅\nUA+,UC: worker sends\ncomplete msg
-Sent+\n∅\n∅ -> Completed+\n∅\n∅: worker sends\nreject msg
+∅ -> Admitted: New()
+Admitted -> Requested+: attach request payload
+Requested+ -> Sent+: Send()
+Sent+ -> Accepted+: worker sends\naccept msg
+Accepted+ -> Completed+: worker sends\ncomplete msg
+Sent+ -> Rejected+: worker sends\nreject msg
 
-Admitted\n∅\n∅ -> ∅\n∅\n∅\n: lose registry
-Requested+\n∅\n∅ -> ∅\n∅\n∅\n: lose registry
-Sent+\n∅\n∅ -> ∅\n∅\n∅\n: lose registry
-Accepted+\nAccepted\nUA+ -> Accepted+\nAccepted\nUA+: lose registry
+Admitted -> ∅: lose registry
+Requested+ -> ∅: lose registry
+Sent+ -> ∅: lose registry
+# Accepted+ -> Accepted+: lose registry
 
-∅\n∅\n∅\n -> fail-wft: worker sends\naccept/reject msg
+∅ -> fail-wft: worker sends\naccept/reject msg
 
+∅: {
+  label: ∅\n∅\n∅\n
+}
+Sent+: {
+  label: Sent+\n∅\n∅
+}
+Admitted: {
+  label: Admitted\n∅\n∅
+}
+Requested+: {
+  label: Requested+\n∅\n∅
+}
+Accepted+: {
+  label: Accepted+\nAccepted\nUA+
+}
+Completed+: {
+  label: Completed+\n∅\nUA+,UC
+}
+Rejected+: {
+  label: Completed+\n∅\n∅
+}
 fail-wft: {
   label: ERROR\n(fail WFT)
   style.font-color: red
