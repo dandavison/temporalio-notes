@@ -1,34 +1,48 @@
 explanation: |md
-  Each state comprises 3 substates, arranged vertically. These are:
+  **Each state comprises 3 substates, arranged vertically**:
   - `UpdateRegistry` entry
   - mutable state `UpdateInfo` entry
   - history events
 
-  \+ indicates that the request payload is present.
+  **History event codes**:
+
+  - UR = UpdateRequested
+  - UA = UpdateAccepted
+  - UC = UpdateCompleted
+
+  **\+ indicates that the request payload is present**.
+
 | {near: top-left}
 
-∅ -> Admitted: New()
-Admitted -> Requested+: attach request payload
-Requested+ -> Sent+: Send()
-Sent+ -> Accepted+: worker sends\naccept msg
-Accepted+ -> Completed+: worker sends\ncomplete msg
-Sent+ -> Rejected+: worker sends\nreject msg
+∅ -> Requested+: New()\nattach request payload
 
-Admitted -> ∅: lose registry
+# ∅ -> Admitted: New()
+# Admitted -> Requested+: attach request payload
+# Admitted -> ∅: lose registry
+# Admitted: {
+#     label: Admitted\n∅\n∅
+#   }
+
+Requested+ -> Accepted+: worker sends\naccept msg
+Requested+ -> Rejected+: worker sends\nreject msg
+# More accurately, with Sent state
+# Requested+ -> Sent+: Send()
+# Sent+ -> Accepted+: worker sends\naccept msg
+# Sent+ -> Rejected+: worker sends\nreject msg
+# Sent+ -> ∅: lose registry
+# Sent+: {
+#   label: Sent+\n∅\n∅
+# }
+
+Accepted+ -> Completed+: worker sends\ncomplete msg
+
 Requested+ -> ∅: lose registry
-Sent+ -> ∅: lose registry
 # Accepted+ -> Accepted+: lose registry
 
 ∅ -> fail-wft: worker sends\naccept/reject msg
 
 ∅: {
   label: ∅\n∅\n∅\n
-}
-Sent+: {
-  label: Sent+\n∅\n∅
-}
-Admitted: {
-  label: Admitted\n∅\n∅
 }
 Requested+: {
   label: Requested+\n∅\n∅
@@ -37,10 +51,10 @@ Accepted+: {
   label: Accepted+\nAccepted\nUA+
 }
 Completed+: {
-  label: Completed+\n∅\nUA+,UC
+  label: ∅\nCompleted\nUA+,UC
 }
 Rejected+: {
-  label: Completed+\n∅\n∅
+  label: ∅\n∅\n∅
 }
 fail-wft: {
   label: ERROR\n(fail WFT)
@@ -53,13 +67,13 @@ Accepted+ -> ReappliedR: reapply
 Rejected+ -> bug-reapply-rejected: reapply
 ReappliedR -> ReappliedRA: worker sends\naccept msg
 ReappliedRA -> ReappliedRAC: worker sends\ncomplete msg
-ReappliedRA -> ReappliedRAJ: worker sends\nreject msg
+ReappliedR -> ReappliedRAJ: worker sends\nreject msg
 
 # Multiple reapplies
 ReappliedR -> ReappliedR: reapply
 ReappliedRA -> ReappliedR: reapply
 ReappliedRAC -> ReappliedR: reapply
-ReappliedRAJ -> ReappliedR: reapply\n(rejected reapplied update\ncan be reapplied!)
+ReappliedRAJ -> ReappliedR: reapply\n(rejected\nreapplied update\nwill be reapplied!)
 
 # Reapply states
 ReappliedR: {
@@ -69,10 +83,11 @@ ReappliedRA: {
   label: Accepted\nAccepted\nUR+,UA
 }
 ReappliedRAC: {
-  label: Completed\nCompleted\nUR+,UA,UC
+  label: ∅\nCompleted\nUR+,UA,UC
 }
 ReappliedRAJ: {
-  label: Completed\nCompleted\nUR+,UA,UJ
+  label: ∅\nCompleted\nUR+
+  style.font-color: orange
 }
 bug-reapply-rejected: {
   label: TEMPORAL FLAW\n(rejected update\ncannot be reapplied)
