@@ -1,12 +1,95 @@
-admitted -> requested
-requested -> sent
-sent -> accepted
-accepted -> completed
-sent -> completed
+explanation: |md
+  **Each state comprises 3 substates, arranged vertically**:
+  - `UpdateRegistry` entry
+  - mutable state `UpdateInfo` entry
+  - history events
 
-accepted -> reappliedRequested
-reappliedRequested -> reappliedRequested
-reappliedRequested -> reappliedSent
-reappliedSent -> reappliedAccepted
-reappliedAccepted -> completed
-reappliedSent -> completed
+  **History event codes**:
+
+  - UAd = UpdateAdmitted
+  - UAc = UpdateAccepted
+  - UC = UpdateCompleted
+
+  **\+ indicates that the request payload is present**.
+
+| {near: top-left}
+
+∅ -> Admitted+: New()\nattach request payload
+
+# ∅ -> Created: New()
+# Created -> Admitted+: attach request payload
+# Created -> ∅: lose registry
+# Created: {
+#     label: Created\n∅\n∅
+#   }
+
+Admitted+ -> Accepted+: worker sends\naccept msg
+Admitted+ -> Rejected+: worker sends\nreject msg
+# More accurately, with Sent state
+# Admitted+ -> Sent+: Send()
+# Sent+ -> Accepted+: worker sends\naccept msg
+# Sent+ -> Rejected+: worker sends\nreject msg
+# Sent+ -> ∅: lose registry
+# Sent+: {
+#   label: Sent+\n∅\n∅
+# }
+
+Accepted+ -> Completed+: worker sends\ncomplete msg
+
+Admitted+ -> ∅: lose registry
+# Accepted+ -> Accepted+: lose registry
+
+∅ -> fail-wft: worker sends\naccept/reject msg
+
+∅: {
+  label: ∅\n∅\n∅\n
+}
+Admitted+: {
+  label: Admitted+\n∅\n∅
+}
+Accepted+: {
+  label: Accepted+\nAccepted\nUAc+
+}
+Completed+: {
+  label: ∅\nCompleted\nUAc+,UC
+}
+Rejected+: {
+  label: ∅\n∅\n∅
+}
+fail-wft: {
+  label: ERROR\n(fail WFT)
+  style.font-color: red
+}
+
+# With reapplied updates
+Completed+ -> ReappliedA: reapply
+Accepted+ -> ReappliedA: reapply
+Rejected+ -> bug-reapply-rejected: reapply
+ReappliedA -> ReappliedAA: worker sends\naccept msg
+ReappliedAA -> ReappliedAAC: worker sends\ncomplete msg
+ReappliedA -> ReappliedAAR: worker sends\nreject msg
+
+# Multiple reapplies
+ReappliedA -> ReappliedA: reapply
+ReappliedAA -> ReappliedA: reapply
+ReappliedAAC -> ReappliedA: reapply
+ReappliedAAR -> ReappliedA: reapply\n(rejected\nreapplied update\nwill be reapplied!)
+
+# Reapply states
+ReappliedA: {
+  label: Admitted\nAdmitted\nUAd+
+}
+ReappliedAA: {
+  label: Accepted\nAccepted\nUAd+,UAc
+}
+ReappliedAAC: {
+  label: ∅\nCompleted\nUAd+,UAc,UC
+}
+ReappliedAAR: {
+  label: ∅\nCompleted\nUAd+
+  style.font-color: orange
+}
+bug-reapply-rejected: {
+  label: TEMPORAL FLAW\n(rejected update\ncannot be reapplied)
+  style.font-color: red
+}
