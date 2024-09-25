@@ -1,0 +1,28 @@
+shape: sequence_diagram
+c: {
+  label: Client
+  shape: hexagon
+}
+fe: {
+  label: Frontend
+}
+h: {
+  label: History/\nMatching
+}
+w: {
+  label: Worker
+}
+
+h -> w: WFT
+c -> fe: update
+fe -> h: update
+h."Admitted"
+w -> h: complete WF
+h."Fail WFT due to admitted update\nclear MS & registry"
+h -> fe: error
+h -> w: fail WFT
+h -> w: WFT (no update)
+race condition: {
+  w -> h: complete WF
+  fe -> h: retry
+}

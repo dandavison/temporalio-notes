@@ -1,0 +1,22 @@
+shape: sequence_diagram
+c: {
+  label: Client
+  shape: hexagon
+}
+s: {
+  label: Server
+}
+w: {
+  label: Worker
+}
+c -> s: start wf
+c -> s: startUpdate\n(wait until Completed)
+s -> w: WFT
+w -> s: Accept update
+s."event ID X"
+c -> s: signal
+s -> w: WFT
+w -> s: WFTCompleted
+c -> s: Reset to event ID X
+s -> w: WFT
+w -> s: Complete update

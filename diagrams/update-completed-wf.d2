@@ -1,0 +1,11 @@
+UpdateWorkflowExecution(wfID, upID) -> wf exists?
+
+wf exists? -> wf running?: yes
+wf exists? -> Error: no
+
+wf running? -> Error: no
+wf running? -> update exists?: yes
+
+update exists? -> wait for requested stage\n\nreturn update info: yes
+update exists? -> create update: no
+create update -> wait for requested stage\n\nreturn update info
