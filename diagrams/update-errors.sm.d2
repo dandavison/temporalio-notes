@@ -1,0 +1,58 @@
+# https://github.com/temporalio/temporal/issues/6085
+
+UpdateWorkflowExecution(wfID, upID) -> wf exists?
+
+wf exists? -> wf running?: yes
+wf exists? -> NotFound: no
+
+wf running? -> update exists?: no
+wf running? -> wait for Accepted: yes
+
+update exists? -> SuccessUpdateInWhateverState: yes
+update exists? -> NotFoundWorkflowCompleted: no
+
+wait for Accepted -> NotFoundWorkflowCompleted: wf timeout\nor\ncomplete/CAN/fail\n(& cancel in \nPython)
+wait for Accepted -> SuccessUpdateFailed: wf cancelled\n(except Python)
+wait for Accepted -> SuccessUpdateFailed: update\nRejected
+wait for Accepted -> SuccessUpdateAccepted: update\nAccepted
+wait for Accepted -> wait for Completed: waiting for\nCompleted,\nupdate\nAccepted
+
+wait for Completed -> SuccessUpdateCompleted: update\nCompleted
+wait for Completed -> SuccessUpdateFailed: wf cancelled\n(except\nPython)
+wait for Completed -> SuccessUpdateFailed: update\nFailed\n(e.g. Activity\nfailed)
+wait for Completed -> NotFoundWorkflowCompleted': wf timeout\nor\ncomplete/CAN/fail\n(& cancel in \nPython)
+
+NotFoundWorkflowCompleted: {
+  label: gRPC NOT_FOUND\n\n"workflow execution\nalready completed"
+  style.font-color: red
+}
+
+NotFoundWorkflowCompleted': {
+  label: gRPC NOT_FOUND\n\n"workflow execution\nalready completed"
+  style.font-color: red
+}
+
+NotFound: {
+  label: gRPC NOT_FOUND
+  style.font-color: red
+}
+
+SuccessUpdateAccepted: {
+  label: gRPC Success\n(update accepted)
+  style.font-color: green
+}
+
+SuccessUpdateCompleted: {
+  label: gRPC Success\n(update completed\n+result)
+  style.font-color: green
+}
+
+SuccessUpdateFailed: {
+  label: gRPC Success\n(update failed)
+  style.font-color: green
+}
+
+SuccessUpdateInWhateverState: {
+  label: gRPC Success\n(update in whatever\nstate it's in)
+  style.font-color: green
+}
