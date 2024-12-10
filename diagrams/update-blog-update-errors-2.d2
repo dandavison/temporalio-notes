@@ -1,0 +1,29 @@
+shape: sequence_diagram
+
+C: {
+  label: Client
+}
+S: {
+  label: Temporal\nServer
+}
+W: {
+  label: Workflow\nWorker
+}
+S.style: {
+  fill: "#B664FF"
+  font-color: "#EEEEEE"
+}
+
+C.1 -> S: Update that\nexecutes an\nActivity
+W -> S.1: poll
+S.1 -> W.1: Update
+W.1 -> S: Update Rejected\nby validator {
+  style.stroke-dash: 3
+  style.stroke: red
+  style.font-color: red
+}
+S -> C.1: Error:\nUpdate failed\n(no history events) {
+  style.stroke-dash: 3
+  style.stroke: red
+  style.font-color: red
+}

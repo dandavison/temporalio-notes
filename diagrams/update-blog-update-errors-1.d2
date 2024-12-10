@@ -1,0 +1,22 @@
+shape: sequence_diagram
+
+C: {
+  label: Client
+}
+S: {
+  label: Temporal\nServer
+}
+W: {
+  label: Workflow\nWorker
+}
+S.style: {
+  fill: "#B664FF"
+  font-color: "#EEEEEE"
+}
+
+C.1 -> S: Update that\nexecutes an\nActivity
+S -> C.1: Error:\nPer-workflow\nupdate limit\nexceeded {
+  style.stroke-dash: 3
+  style.stroke: red
+  style.font-color: red
+}
