@@ -7,7 +7,7 @@ S: {
   label: Temporal\nServer
 }
 W: {
-  label: Workflow\nWorker
+  label: Workflow
 }
 S.style: {
   fill: "#B664FF"
@@ -15,9 +15,10 @@ S.style: {
 }
 
 C.1 -> S.1: Signal that\ntriggers an Activity
+S.1."Signal\nwritten to\nhistory"
 S.1 -> C.1: Ack
 C."When is the Activity done?\nHow do I get the result?"
-W -> S.2: poll
+W -> S.2: worker poll
 S.2 -> W.1: Signal that\ntriggers an Activity
 W.1."Signal handler\n\nschedule Activity\n...Activity Worker...\nreceive Activity result"
 W.1."How to notify Client\nthat Activity is done\n and deliver result?"
