@@ -14,7 +14,7 @@ S.style: {
   font-color: "#EEEEEE"
 }
 
-C.1 -> S: Update that\nexecutes an Activity
+C.1 -> S: executeUpdate
 W -> S.1: worker poll
 S.1 -> W.1: Update that\nexecutes an Activity
 W.1 -> S.2: Update\naccepted
@@ -23,4 +23,3 @@ W.1."Update handler\n\nschedule Activity\n...Activity Worker...\nreceive Activit
 W.1 -> S.3: Update\nresult
 S.3."UpdateCompleted\nwritten\nto history"
 S.3 -> C.1: Update\nresult
-C."Client knows Activity is done\nand has Activity result"
