@@ -14,16 +14,28 @@ S.style: {
   font-color: "#EEEEEE"
 }
 
-C.1 -> S: startUpdate
 W -> S.1: worker poll
-S.1 -> W.1: Update that\nexecutes an Activity
-W.1 -> S.2: Update\naccepted
-S.2."UpdateAccepted\nwritten\nto history"
-S.2 -> C.1: Update\naccepted
-C.1."UpdateHandle available"
-W.1."Update handler\n\nschedule Activity\n...Activity Worker...\nreceive Activity result"
-C.2."Use UpdateHandle\nto fetch result"
+C.1 -> S: start\nUpdate {
+  style.bold: true
+}
+S.1 -> W.1: Update
+W.1."Update handler"
+W.1 -> S.2: accept Update\nschedule Activity
+S.2."UpdateAccepted\nwritten to history\n\ndispatch Activity task..."
+S.2 -> C.1: Update accepted
+C.1."Update handle available"
+W -> S.3: worker poll
+C.2."use Update handle\nto fetch result"
+S.3."...receive Activity result"
+S.3 -> W.2: Activity result
 C.2 -> S.3: fetch result
-W.1 -> S.3: Update\nresult
-S.3."UpdateCompleted\nwritten\nto history"
-S.3 -> C.2: Update\nresult
+W.2."Update handler"
+W.2 -> S.3: Update\nresult {
+  style.bold: true
+  style.font-color: green
+}
+S.3."UpdateCompleted\nwritten to history"
+S.3 -> C.2: Update\nresult {
+  style.bold: true
+  style.font-color: green
+}

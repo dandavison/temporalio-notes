@@ -15,13 +15,12 @@ S.style: {
 }
 
 W -> S.1: worker poll
-C.1 -> S: Update
+C.1 -> S: Update that\nexecutes an Activity
 S.1 -> W.1: Update
 W.1."Update handler"
-W.1 -> S.2: Update accepted\nScheduleActivity
-S.2."UpdateAccepted\nwritten to history"
+W.1 -> S.2: accept Update\nschedule Activity
+S.2."UpdateAccepted\nwritten to history\n\ndispatch Activity task"
 W -> S.3: worker poll
-S.3."dispatch Activity task"
 S.3."receive Activity result"
 S.3 -> W.2: Activity result
 W.2."Update handler"
@@ -34,4 +33,3 @@ S.3 -> C.1: Update\nresult {
   style.bold: true
   style.font-color: green
 }
-C."Client knows Activity is done\nand has Activity result"
