@@ -31,25 +31,15 @@ not-running-reuse-policy-reject: {
   label: reuse policy\nREJECT ❌
 }
 
-terminated-or-failed-reuse-policy-allow: {
+running-conflict-policy-terminate-reuse-policy-allow: {
   label: reuse policy\nALLOW ✅
 }
-terminated-or-failed-reuse-policy-allow-if-failed: {
-  label: reuse policy\nALLOW_IF_FAILED ✅
+running-conflict-policy-terminate-reuse-policy-allow-if-failed: {
+  label: reuse policy\nALLOW_IF_FAILED\n✅ if terminated or failed\n ❌ if closed without failure
 }
-terminated-or-failed-reuse-policy-reject: {
+running-conflict-policy-terminate-reuse-policy-reject: {
   label: reuse policy\nREJECT\n❌ invalid options
 }
-
-closed-without-failure-reuse-policy-allow: {
-  label: reuse policy\nALLOW ✅
-}
-closed-without-failure-reuse-policy-allow-if-failed: {
-  label: reuse policy\nALLOW_IF_FAILED ❌
-}
-# closed-without-failure-reuse-policy-reject: {
-#   label: reuse policy\nREJECT
-# }
 
 start workflow -> not-running
 start workflow -> running
@@ -58,16 +48,9 @@ running -> running-on-conflict-terminate
 running -> running-on-conflict-fail
 running -> running-on-conflict-allow
 
-running-on-conflict-terminate -> terminated-or-failed
-running-on-conflict-terminate -> closed-without-failure
-
-terminated-or-failed -> terminated-or-failed-reuse-policy-allow
-terminated-or-failed -> terminated-or-failed-reuse-policy-allow-if-failed
-terminated-or-failed -> terminated-or-failed-reuse-policy-reject
-
-closed-without-failure -> terminated-or-failed-reuse-policy-reject
-closed-without-failure -> closed-without-failure-reuse-policy-allow
-closed-without-failure -> closed-without-failure-reuse-policy-allow-if-failed
+running-on-conflict-terminate -> running-conflict-policy-terminate-reuse-policy-allow
+running-on-conflict-terminate -> running-conflict-policy-terminate-reuse-policy-allow-if-failed
+running-on-conflict-terminate -> running-conflict-policy-terminate-reuse-policy-reject
 
 not-running -> not-running-previous-exists
 not-running -> not-running-no-previous-exists
