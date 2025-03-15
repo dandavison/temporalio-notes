@@ -1,0 +1,46 @@
+shape: sequence_diagram
+
+direction: down
+
+explanation: |md
+  # Stateful Nexus: op implemented by Nexus handler
+  - Handler-side Nexus Task backed by CHASM instance
+| {
+  near: top-center
+  style.font-size: 14
+}
+
+CA: {
+  label: "SDK Client"
+}
+
+SA: {
+  label: "Cloud Cell\n\nnamespace A"
+}
+
+SB: {
+  label: "Cloud Cell\n\nnamespace B"
+}
+
+NWB: {
+  label: "Nexus Worker"
+}
+
+CA -> SA: nexus_call(my_operation) {
+  style.font-color: "#D35400"
+}
+SA -> SB: Nexus: StartRequest
+SB.note: create CHASM instance\narchetype: NexusOperation
+SB -> SA: Nexus: StartResponse\n(op token)
+SA -> CA: Ack(op token)
+
+with_retries: "CHASM-backed retries" {
+  SB -> NWB: NexusTask: Start
+  NWB.note: "Nexus handler\nexecutes operation\n\narbitrary duration\nw/ checkpointing"
+  NWB -> SB: result
+}
+
+SB -> SA: Nexus: callback
+SA -> CA: result {
+  style.font-color: "green"
+}

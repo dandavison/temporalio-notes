@@ -1,0 +1,55 @@
+shape: sequence_diagram
+
+direction: down
+
+explanation: |md
+  # Stateful Nexus: op backed by Top-level Activity
+  A non-workflow caller invokes a Nexus operation that's both stateful (has handler-side retries)
+  and is backed by a Top-level Activity (that has its own retries).
+| {
+  near: top-center
+  style.font-size: 14
+}
+
+CA: {
+  label: "SDK Client"
+}
+
+SA: {
+  label: "Cloud Cell\n\nnamespace A"
+}
+
+SB: {
+  label: "Cloud Cell\n\nnamespace B"
+}
+
+NWB: {
+  label: "Nexus Worker"
+}
+
+AWB: {
+  label: "Activity Worker"
+}
+
+CA -> SA: nexus_call(my_operation) {
+  style.font-color: "#D35400"
+}
+SA -> SB: Nexus: StartRequest
+SB.1: create CHASM instance\narchetype: NexusOperation
+SB -> SA: Nexus: StartResponse\n(op token)
+SA -> CA: Ack(op token)
+
+with_retries: "CHASM-backed retries" {
+  SB -> NWB: NexusTask: Start
+  NWB -> SB: StartTopLevelActivity
+  SB.2: create CHASM instance\narchetype: TopLevelActivity
+  with_retries: "CHASM-backed retries" {
+    SB -> AWB: StartActivity
+    AWB -> SB: result
+  }
+}
+
+SB -> SA: Nexus: callback
+SA -> CA: result {
+  style.font-color: "green"
+}

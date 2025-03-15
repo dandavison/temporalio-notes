@@ -1,0 +1,36 @@
+shape: sequence_diagram
+
+CA: {
+  label: "Non-workflow\nSDK Client"
+}
+
+SA: {
+  label: "Cloud Cell\n\nnamespace A"
+}
+
+SB: {
+  label: "Cloud Cell\n\nnamespace B"
+}
+
+NWB: {
+  label: "Nexus Worker"
+}
+
+AWB: {
+  label: "Activity Worker"
+}
+
+CA -> SA: nexus_call(my_operation)
+SA -> SB: Nexus: Start
+
+SB -> NWB: NexusTask: Start
+NWB -> NWB: execute operation
+NWB -> SB: start_activity
+
+with_retries: "Activity retries" {
+  SB -> AWB: start_activity
+  AWB -> SB: activity_result
+}
+
+SB -> SA: Nexus: callback
+SA -> CA: activity_result

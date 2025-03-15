@@ -1,0 +1,31 @@
+shape: sequence_diagram
+
+CA: {
+  label: "Non-workflow\nSDK Client"
+}
+
+SA: {
+  label: "Cloud Cell\n\nnamespace A"
+}
+
+SB: {
+  label: "Cloud Cell\n\nnamespace B"
+}
+
+NWB: {
+  label: "Nexus Worker"
+}
+
+CA -> SA: nexus_call(my_operation)
+SA -> SB: Nexus: Start
+
+SB.note: create CHASM instance\narchetype: Nexus Op
+
+with_retries: "CHASM-backed retries" {
+  SB -> NWB: NexusTask: Start
+  NWB -> NWB: execute operation
+  NWB -> SB: operation_result
+}
+
+SB -> SA: operation_result
+SA -> CA: operation_result

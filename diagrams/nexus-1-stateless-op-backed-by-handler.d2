@@ -1,0 +1,44 @@
+shape: sequence_diagram
+
+direction: down
+
+explanation: |md
+  # Stateless Nexus: op implemented by Nexus handler
+  - No durability of handler-side Nexus Task
+  - Sync match
+  - Requires caller-side retries (e.g. Workflow caller)
+| {
+  near: top-center
+  style.font-size: 14
+}
+
+CA: {
+  label: "SDK Client\n\n(Workflow, or\nnon-Workflow\nwith client-side retries)"
+}
+
+SA: {
+  label: "Cloud Cell\n\nnamespace A"
+}
+
+SB: {
+  label: "Cloud Cell\n\nnamespace B"
+}
+
+NWB: {
+  label: "Nexus Worker"
+}
+
+CA -> SA: nexus_call(my_operation) {
+  style.font-color: "#D35400"
+}
+SA -> SB: Nexus: Start
+SB.note: sync match
+
+SB -> NWB: NexusTask: Start
+NWB.note: "Nexus handler\nexecutes operation"
+NWB -> SB: result
+
+SB -> SA: Nexus: callback
+SA -> CA: result {
+  style.font-color: "green"
+}

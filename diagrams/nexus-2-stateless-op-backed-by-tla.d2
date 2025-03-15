@@ -1,0 +1,56 @@
+shape: sequence_diagram
+
+direction: down
+
+explanation: |md
+  # Stateless Nexus: op backed by Top-level Activity
+  - No durability of handler-side Nexus Task
+  - Sync match
+  - Requires caller-side retries (e.g. Workflow caller)
+| {
+  near: top-center
+  style.font-size: 14
+}
+
+CA: {
+  label: "SDK Client\n\n(Workflow, or\nnon-Workflow\nwith client-side retries)"
+}
+
+SA: {
+  label: "Cloud Cell\n\nnamespace A"
+}
+
+SB: {
+  label: "Cloud Cell\n\nnamespace B"
+}
+
+NWB: {
+  label: "Nexus Worker"
+}
+
+AWB: {
+  label: "Activity Worker"
+}
+
+CA -> SA: nexus_call(my_operation) {
+  style.font-color: "#D35400"
+}
+SA -> SB: Nexus: StartRequest
+SB.1: sync match
+
+SB -> NWB: NexusTask: Start
+NWB -> SB: StartTopLevelActivity
+SB.2: "Create CHASM instance\narchetype: TopLevelActivity"
+SB -> SA: Nexus: StartResponse\n(op token)
+SA -> CA: Ack(op token)
+
+with_retries: "CHASM-backed retries" {
+  SB -> AWB: StartActivity
+  AWB -> SB: result
+}
+NWB -> SB: result
+
+SB -> SA: Nexus: callback
+SA -> CA: result {
+  style.font-color: "green"
+}

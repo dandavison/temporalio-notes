@@ -1,0 +1,28 @@
+shape: sequence_diagram
+
+C: {
+  label: "Non-workflow\nSDK Client"
+}
+
+S: {
+  label: "Cloud Cell"
+}
+
+TW: {
+  label: "Task Worker"
+}
+
+C -> S: start_task(my_task) {
+  style.font-color: "#D35400"
+}
+
+S.note: create\nCHASM instance\n(Task archetype)
+
+with_retries: "CHASM-backed retries" {
+  S -> TW: TaskTask
+  TW -> S: result
+}
+
+S -> C: result {
+  style.font-color: "green"
+}
