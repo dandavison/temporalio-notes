@@ -4,6 +4,7 @@ direction: down
 
 explanation: |md
   # Stateless Nexus: op implemented by Nexus handler
+  - **Not a valid implementation of Top-level Activity: lacks retries/checkpointing**
   - No durability of handler-side Nexus Task
   - Sync match
   - Requires caller-side retries (e.g. Workflow caller)
@@ -35,7 +36,7 @@ SA -> SB: Nexus: Start
 SB.note: sync match
 
 SB -> NWB: NexusTask: Start
-NWB.note: "Nexus handler\nexecutes operation"
+NWB.note: "NewSyncOperation"
 NWB -> SB: result
 
 SB -> SA: Nexus: callback

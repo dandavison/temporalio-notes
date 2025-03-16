@@ -11,18 +11,18 @@ from pathlib import Path
 
 from jinja2 import BaseLoader, Environment
 
-glob, outfile, columns = sys.argv[1:]
+outfile, columns, *img_files = sys.argv[1:]
 outfile = Path(outfile).absolute()
 
 # Find all SVG files using the provided glob pattern
-svg_files = sorted(Path().glob(glob))
+img_files = [Path(f) for f in img_files]
 diagrams = [
     {
-        "name": svg.stem,
-        "path": str(svg.absolute().relative_to(outfile.parent, walk_up=True)),
-        "alt": " ".join(word.capitalize() for word in svg.stem.split("-")),
+        "name": f.stem,
+        "path": str(f.absolute().relative_to(outfile.parent, walk_up=True)),
+        "alt": " ".join(word.capitalize() for word in f.stem.split("-")),
     }
-    for svg in svg_files
+    for f in img_files
 ]
 
 template = """<!DOCTYPE html>
