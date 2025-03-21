@@ -35,16 +35,19 @@ CA -> SA: nexus_call(my_operation) {
   style.font-color: "#D35400"
 }
 SA -> SB: Nexus: StartRequest
-SB.1: create CHASM instance\narchetype: NexusOperation
+SB.1: create ASM instance\n\narchetype: NexusOperation
 SB -> SA: Nexus: StartResponse\n(op token)
 SA -> CA: Ack(op token)
 
 with_retries: "CHASM-backed retries" {
   SB -> NWB: NexusTask: Start
-  NWB -> SB: StartTopLevelActivity
-  SB.2: create CHASM instance\narchetype: TopLevelActivity
+  NWB -> SB: start_task(my_task) {
+    style.font-color: "#D35400"
+  }
+  SB.2: create ASM instance\n\narchetype: RetryableCheckpointingTask
   with_retries: "CHASM-backed retries" {
-    SB -> AWB: StartActivity
+    SB -> AWB: TaskTask
+    AWB.1: "K/V checkpointing"
     AWB -> SB: result
   }
 }

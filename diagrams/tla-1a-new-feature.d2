@@ -1,7 +1,7 @@
 shape: sequence_diagram
 
 explanation: |md
-  # Top-level Activity: within-namespace
+  # Top-level Task: within-namespace
   - New CHASM-backed product feature
 | {
   near: top-center
@@ -9,7 +9,7 @@ explanation: |md
 }
 
 C: {
-  label: "Non-workflow\nSDK Client"
+  label: "SDK Client\n\n(workflow or\nnon-workflow)"
 }
 
 S: {
@@ -17,17 +17,20 @@ S: {
 }
 
 TW: {
-  label: "TopLevelActivity\nWorker"
+  label: "Task\nWorker"
 }
+
+TW.0: "register Task"
 
 C -> S: start_task(my_task) {
   style.font-color: "#D35400"
 }
 
-S.note: create CHASM instance\n\narchetype: TopLevelActivity
+S.1: create ASM instance\n\narchetype:\nRetryableCheckpointingTask
 
 with_retries: "CHASM-backed retries" {
-  S -> TW: TopLevelActivityTask
+  S -> TW: TaskTask
+  TW.1: "K/V checkpointing"
   TW -> S: result
 }
 

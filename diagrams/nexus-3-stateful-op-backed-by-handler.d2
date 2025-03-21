@@ -11,7 +11,7 @@ explanation: |md
 }
 
 CA: {
-  label: "SDK Client"
+  label: "SDK Client\n\n(workflow or\nnon-workflow)"
 }
 
 SA: {
@@ -26,11 +26,12 @@ NWB: {
   label: "Nexus Worker"
 }
 
+NWB.1: "register\nNexus service"
 CA -> SA: nexus_call(my_operation) {
   style.font-color: "#D35400"
 }
 SA -> SB: Nexus: StartRequest
-SB.note: create CHASM instance\narchetype: NexusOperation
+SB.note: create ASM instance\n\narchetype: NexusOperation
 SB -> SA: Nexus: StartResponse\n(op token)
 SA -> CA: Ack(op token)
 
