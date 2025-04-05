@@ -1,0 +1,46 @@
+shape: sequence_diagram
+
+explanation: |md
+  # Top-level Task: cross-namespace
+  **Invalid: how are available tasks discovered by client A if not as Nexus operations?**
+
+| {
+  near: top-center
+  style.font-size: 14
+}
+
+C: {
+  label: "SDK Client\n\n(workflow or\nnon-workflow)"
+}
+
+SA: {
+  label: "Cloud Cell\n\n(namespace A)"
+}
+
+SB: {
+  label: "Cloud Cell\n\n(namespace B)"
+}
+
+TWB: {
+  label: "Task\nWorker"
+}
+
+TWB.0: "register Task"
+
+C -> SA: start_task(my_task) {
+  style.font-color: "#D35400"
+}
+
+SA -> SB: Nexus: StartRequest
+SB.1: create ASM instance\n\narchetype:\nRetryableCheckpointingTask
+
+with_retries: "CHASM-backed retries" {
+  SB -> TWB: TaskTask
+  TWB.1: "K/V checkpointing"
+  TWB -> SB: result
+}
+
+SB -> SA: Nexus: callback
+SA -> C: result {
+  style.font-color: "green"
+}

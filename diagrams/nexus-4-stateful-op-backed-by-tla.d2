@@ -27,9 +27,12 @@ NWB: {
   label: "Nexus Worker"
 }
 
-AWB: {
-  label: "Activity Worker"
+TWB: {
+  label: "Task Worker"
 }
+
+TWB.0: "register Task"
+NWB.0: "register Nexus service"
 
 CA -> SA: nexus_call(my_operation) {
   style.font-color: "#D35400"
@@ -46,13 +49,17 @@ with_retries: "CHASM-backed retries" {
   }
   SB.2: create ASM instance\n\narchetype: RetryableCheckpointingTask
   with_retries: "CHASM-backed retries" {
-    SB -> AWB: TaskTask
-    AWB.1: "K/V checkpointing"
-    AWB -> SB: result
+    SB -> TWB: TaskTask
+    TWB.1: "K/V checkpointing"
+    TWB -> SB: result {
+      style.font-color: "green"
+    }
   }
 }
 
-SB -> SA: Nexus: callback
+SB -> SA: Nexus: callback {
+  style.font-color: "green"
+}
 SA -> CA: result {
   style.font-color: "green"
 }
