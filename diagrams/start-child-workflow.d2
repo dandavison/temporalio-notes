@@ -1,0 +1,86 @@
+# gemini 2.5 pro exp 03-25
+#
+# OK, I haven't read everything you output (can you keep it a bit briefer henceforth? I'll ask you to expand where necessary). But I can see that it's as I think you're saying:
+
+# In the case of ChildWorkflow, a workflow task (WFT) is dispatched when the child workflow starts.
+
+# But in the case of Activity, no WFT is dispatched when the activity starts.
+
+# Please take me through the state machine that is conceptually at play when I use start_child_workflow. You're in agent mode; feel free to look at @_workflow_instance.py @workflow.py  etc
+#
+shape: sequence_diagram
+
+# Participants
+ParentCode: {
+  label: "Parent Workflow\nCode"
+}
+ParentInstance: {
+  label: "_WorkflowInstanceImpl\n(Parent)"
+}
+ChildHandle: {
+  label: "_ChildWorkflowHandle"
+}
+Server: {
+  label: "Temporal Server"
+}
+
+# Sequence
+ParentCode -> ParentInstance.1: workflow.start_child_workflow(...)
+ParentInstance.1.1: "_outbound_start_child_workflow called"
+ParentInstance.1.2: "Create _ChildWorkflowHandle\n(with _start_fut, _result_fut, _task)" {
+  ParentInstance -> ChildHandle: create()
+}
+ParentInstance.1.3: "_apply_start_command adds\nStartChildWorkflowExecution cmd"
+ParentInstance.1.4: "await asyncio.shield(handle._start_fut)" {
+  style.stroke-dash: 3 # Dashed line indicates waiting
+}
+
+# Activation completes, command sent to server
+ParentInstance -> Server.1: Sends StartChildWorkflowExecution cmd
+
+Server.1.1: "Appends StartChildWorkflowExecutionInitiated"
+Server.1.2: "Starts child execution"
+Server.1.3: "Appends ChildWorkflowExecutionStarted"
+Server.1.4: "Schedules new WFT for Parent"
+
+Server -> ParentInstance.2: "Activation\n(with ResolveChildWorkflowExecutionStart job)"
+
+ParentInstance.2.1: "_apply_resolve_child_workflow_execution_start called"
+ParentInstance.2.2: "Finds ChildHandle by seq"
+ParentInstance.2.3: "Call handle._resolve_start_success()" {
+  ParentInstance -> ChildHandle.1: _resolve_start_success()
+}
+ChildHandle.1.1: "Set _start_fut result to None"
+
+# Waiting in 1.4 is now unblocked
+ParentInstance.1.5: "await _start_fut completes"
+ParentInstance.1.6: "Return ChildHandle" {
+  ParentInstance -> ParentCode: ChildHandle returned
+}
+ParentCode.1: "Execution continues past start_child_workflow"
+ParentCode.2: "(Optional) await handle" {
+  style.stroke-dash: 3
+  # Dashed line indicates potential later await
+  # This await internally waits on ChildHandle._task, which awaits ChildHandle._result_fut
+}
+
+# --- Much Later ---
+"...": "Much Later...\nChild Finishes" {
+  style.stroke-dash: 4
+}
+
+Server.2: "Receives child completion"
+Server.2.1: "Appends ChildWorkflowExecutionCompleted/Failed/etc."
+Server.2.2: "Schedules new WFT for Parent"
+
+Server -> ParentInstance.3: "Activation\n(with ResolveChildWorkflowExecution job)"
+
+ParentInstance.3.1: "_apply_resolve_child_workflow_execution called"
+ParentInstance.3.2: "Finds ChildHandle by seq"
+ParentInstance.3.3: "Call handle._resolve_success() or _resolve_failure()" {
+  ParentInstance -> ChildHandle.2: _resolve_success(result) # Or _resolve_failure(err)
+}
+ChildHandle.2.1: "Set _result_fut result/exception"
+
+# If ParentCode.2 was executed, it now unblocks
+ParentCode.3: "(Optional) await handle completes,\nreturning result/error"
