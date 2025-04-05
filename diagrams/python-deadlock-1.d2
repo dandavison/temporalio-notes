@@ -8,20 +8,28 @@ HA: {
   label: handle_activation()\nTask
 }
 
-A: {
+A1: {
   label: activate()\nthread
+}
+A2: {
+  label: activate()\nthread\n(eviction)
 }
 
 C -> HA.1: "Activation"
 HA.1.1: "get workflow from cache\nor create new instance"
 HA.1.2: "run instance.activate()\nin separate thread w/ timeout"
-HA.1 -> A: activate
-A.1.1: "create asyncio Tasks\nset self as current event loop\nrun loop"
-HA.1.3: Deadlock detected!
+HA.1 -> A1.1: activate
+A1.1.1: "create asyncio Tasks\nset self as current event loop\nrun loop"
+HA.1.3: Some exception occurred\n\nE.g. timeout due to\nuser code blocking thread\n(deadlock) {
+  style.font-color: red
+}
+A1.1.2: Thread will never be used again\nif it deadlocked
 HA.1 -> C: "Fail task"
 C -> HA.2: "Eviction job"
 HA.2.1: "run instance.activate()\nin separate thread w/ timeout"
-HA.2 -> A: activate
-HA.2.2: Still deadlocked!\nDon't send completion to core.
-A.2.1: Thread will never be used again
+HA.2 -> A2.1: activate
+HA.2.2: Some exception occurred\nDon't send completion to core.\n\nPerhaps second deadlock or\nperhaps some WF tasks failed to exit {
+  style.font-color: red
+}
+A2.1.1: Thread will never be used again\nif it deadlocked
 C.1: Slot will never be available again

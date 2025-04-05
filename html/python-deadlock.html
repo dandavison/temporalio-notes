@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Python Deadlock Examples</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1600px; /* Adjusted for potentially wide diagrams */
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .grid {
+            display: grid;
+            /* Force two columns */
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            padding: 20px;
+            align-items: start; /* Align items to the top */
+        }
+        .diagram {
+            /* Removed margin-bottom as grid gap handles spacing */
+        }
+        /* Added back h2 styling */
+        h2 {
+            text-align: center; /* Center the title */
+            color: #333;
+            font-size: 1.2em;
+            margin-top: 0;
+            margin-bottom: 10px; /* Add space below title */
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            display: block; /* Ensure image behaves like a block */
+            margin: 0 auto; /* Center image if smaller than container */
+        }
+        /* Removed responsive media query as it's fixed to 2 columns */
+    </style>
+</head>
+<body>
+    <div class="grid">
+        <div class="diagram">
+            <h2>Before</h2>
+            <img src="../img/python-deadlock-1.svg" alt="Python Deadlock 1 - Before">
+        </div>
+
+        <div class="diagram">
+            <h2>After</h2>
+            <img src="../img/python-deadlock-2.svg" alt="Python Deadlock 2 - After">
+        </div>
+    </div>
+</body>
+</html>

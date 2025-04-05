@@ -8,43 +8,54 @@ HA: {
   label: handle_activation()\nTask
 }
 
-A: {
+A1: {
   label: activate()\nthread
+}
+A2: {
+  label: activate()\nthread\n(eviction)
 }
 
 C -> HA.1: "Activation"
 HA.1.1: "get workflow from cache\nor create new instance"
 HA.1.2: "run instance.activate()\nin separate thread w/ timeout"
-HA.1 -> A: activate
-A.1.0: "set _deadlock_can_be_interrupted=True" {
+HA.1 -> A1: activate
+A1.1.0: "set instance.can_be_interrupted=True" {
   style.font-color: green
 }
-A.1.1: "create asyncio Tasks\nset self as current event loop\nrun loop"
-A.1.2: "set _deadlock_can_be_interrupted=False\nBUT IT NEVER HAPPENS" {
-  style.font-color: green
+A1.1.1: "create asyncio Tasks\nset self as current event loop\nrun loop"
+A1.1.2: "set instance.can_be_interrupted=False\n(CODE NOT REACHED DUE TO\nUSER CODE BLOCKING THREAD)" {
+  style.font-color: grey
 }
-HA.1.3: Deadlock detected!
-HA.1.4: attempt_deadlock_interruption() {
-  style.font-color: green
+HA.1.3: Some exception occurred\n\nE.g. timeout due to\nuser code blocking thread\n(deadlock) {
+  style.font-color: red
 }
-HA.1 -> A.1: "interrupt thread from Rust" {
-  style.font-color: green
+if instance\.can_be_interrupted: {
+  HA.1 -> A1.1: "interrupt thread from Rust" {
+    style.font-color: green
+  }
 }
 HA.1.5: set instance.deadlocked_activation_task\n= activate task {
   style.font-color: green
 }
 HA.1 -> C: "Fail task"
 C -> HA.2: "Eviction job"
-HA.2.1: handle_cache_eviction() {
-  style.font-color: green
-}
 HA.2.2: wait forever for\ninstance.deadlocked_activation_task {
   style.font-color: green
 }
 try forever: {
-  HA.2 -> A.2: activate
-  HA.2.3: Still deadlocked!\n(log error on first occasion) {
+  HA.2.3: "run instance.activate()\nin separate thread w/ timeout" {
     style.font-color: green
+  }
+  HA.2 -> A2.2: activate
+  A2.2.0: "set instance.can_be_interrupted=True" {
+    style.font-color: green
+  }
+  A2.2.1: "create asyncio Tasks\nset self as current event loop\nrun loop\n\nrequest cancellation of WF tasks"
+  A2.2.2: "set instance.can_be_interrupted=False" {
+    style.font-color: green
+  }
+  HA.2.4: Some exception occurred\nDon't send completion to core.\n\nPerhaps second deadlock or\nperhaps some WF tasks failed to exit {
+    style.font-color: red
   }
 }
 HA.2 -> C: "send completion if it breaks out of loop" {
