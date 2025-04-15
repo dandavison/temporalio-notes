@@ -1,0 +1,57 @@
+explanation: |md
+  **Each state comprises 2 substates**:
+  - `start_future<None>`
+  - `result_future<Result>`
+
+  Additionally, the `ChildWorkflowHandle` is itself a future.
+
+  `await start_child_workflow()` awaits on `start_future`.
+
+  `await handle` awaits on `result_future`.
+
+  In both cases, cancellation of the asyncio task results in sending
+
+  a `cancel_nexus_operation` command.
+
+  All other transitions throw `InvalidStateError.
+| {near: top-left}
+
+∅: {
+  label: ∅\n∅\n\nawait start_child_workflow()
+}
+
+Started: {
+  label: Done\n∅\n\nawait handle
+  style.font-color: orange
+}
+
+StartError: {
+  label: Error\nDone
+  style.font-color: red
+}
+
+ResultAvailable: {
+  label: Done\nDone \[Result\]
+  style.font-color: green
+}
+
+ResultError: {
+  label: Done\nError
+  style.font-color: red
+}
+
+# resolve_start job from Core
+
+∅ -> Started: StartSuccess
+
+∅ -> StartError: StartFailure
+
+∅ -> StartError: StartCancelled
+
+# resolve_cw job from Core
+
+Started -> ResultAvailable: ResultSuccess
+
+Started -> ResultError: ResultFailure
+
+Started -> ResultError: ResultCancellation

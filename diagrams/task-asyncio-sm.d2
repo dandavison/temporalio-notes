@@ -1,0 +1,13 @@
+∅ -> Started: asyncio.create_task()
+
+Started -> CancelRequested: task.cancel()\n-> True
+
+Started -> Completed: no more\nawait points
+
+CancelRequested -> CancelledError: more\nawait points
+
+CancelRequested -> Completed: no more\nawait points
+
+Completed -> Completed: task.cancel()\n-> False
+
+CancelledError -> CancelledError: task.cancel()\n-> False
