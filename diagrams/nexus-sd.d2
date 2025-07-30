@@ -1,0 +1,24 @@
+shape: sequence_diagram
+c: {
+  label: Client
+}
+s: {
+  label: Server
+}
+w: {
+  label: Worker
+}
+
+Start: "" {
+  c.s1 -> s.s1: Start(operation, callback)
+  s.s1 -> w.s1: Start(operation, callback)
+  w.s1 -> s.s1: StartedAsync
+  s.s1 -> c.s1: StartedAsync
+}
+
+Complete: "" {
+  w.s2."Operation completes"
+  w.s2 -> s.s2: gRPC CompletionClient:\nCompleteNexusOperationRequest
+  s.s2 -> c.s2: Completion Handler\nHTTP CompletionClient:\ndeliver result\nvia callback
+  s.s2 -> w.s2: CompleteNexusOperationResponse
+}
