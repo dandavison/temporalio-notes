@@ -1,0 +1,36 @@
+shape: sequence_diagram
+aw: {
+  label: Agent\nWorkflow
+}
+n: {
+  label: Nexus service
+}
+sw: {
+  label: MCP Session\nWorkflow
+}
+a: {
+  label: Activity\n\n(proxies requests\nto MCP server)
+}
+m: {
+  label: MCP Server\nprocess
+}
+
+Start: "Initialize Session" {
+  aw.1 -> n.1: \ninitialize_session\n(executable path,\nargs,\nenv vars)
+  n.1 -> sw.1: start workflow
+  sw.1 -> a.1: \nexecute activity
+  a.1 -> m.1: start process\nestablish stdio\nfd connections
+  a.1 -> sw.1: fetch next request\n"long poll"\n(blocking update)
+}
+
+Request: "Send tools/call in \$sessionID" {
+  aw.2 -> n.2: call_tool\n(nexus operation)
+  n.2 -> sw.2: call_tool\n(workflow update)
+  sw.2."Unblock pending update"
+  sw.2 -> a.2: mcp request
+  a.2 -> m.2: proxy request
+  m.2 -> a.2: mcp result
+  a.2 -> sw.2: mcp result and\nfetch next request\n"long poll"\n(blocking update)
+  sw.2 -> n.2: tool call result
+  n.2 -> aw.2: tool call result
+}

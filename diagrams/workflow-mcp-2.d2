@@ -1,0 +1,20 @@
+shape: sequence_diagram
+aw: {
+  label: Agent\nWorkflow
+}
+n: {
+  label: Nexus service
+}
+sw: {
+  label: Sequential Thinking\nMCP Session Workflow
+}
+
+Start: "Initialize Session" {
+  aw.1 -> n.1: \ninitialize_session\n(executable path,\nargs,\nenv vars)
+  n.1 -> sw.1: start workflow
+}
+
+Request: "Send tools/call in \$sessionID" {
+  aw.2 -> n.2: call_tool\n(nexus operation)
+  n.2 -> sw.2: call_tool\n(workflow update)
+}

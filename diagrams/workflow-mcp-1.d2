@@ -1,0 +1,24 @@
+shape: sequence_diagram
+w: {
+  label: Agent\nWorkflow
+}
+a: {
+  label: Activity\n\n(proxies requests\nto MCP server)
+}
+m: {
+  label: MCP Server\nprocess
+}
+
+Start: "Initialize Session" {
+  w.1 -> a.1: \nexecute activity\n(executable path,\nargs,\nenv vars)
+  a.1 -> m.1: start process\nestablish stdio\nfd connections
+  a.1 -> w.1: fetch next request\n"long poll"\n(blocking update)\nupdate input\ncontains session ID
+}
+
+Request: "Send request to \$sessionID" {
+  w.2."Unblock pending update\nfor $sessionID"
+  w.2 -> a.2: send request
+  a.2 -> m.2: proxy request
+  m.2 -> a.2: mcp result
+  a.2 -> w.2: mcp result and\nfetch next request\n"long poll"\n(blocking update)
+}
