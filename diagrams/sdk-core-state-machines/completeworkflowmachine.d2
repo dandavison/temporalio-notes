@@ -1,0 +1,59 @@
+# CompleteWorkflowMachine State Machine
+
+# States
+CompleteWorkflowCommandCreated: {
+  shape: rectangle
+}
+
+CompleteWorkflowCommandRecorded: {
+  shape: rectangle
+}
+
+Created: {
+  shape: rectangle
+}
+
+# Transitions
+Created -> CompleteWorkflowCommandCreated: {
+  label: "Schedule\n(on_schedule)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+CompleteWorkflowCommandCreated -> CompleteWorkflowCommandCreated: {
+  label: "CommandCompleteWorkflowExecution"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+CompleteWorkflowCommandCreated -> CompleteWorkflowCommandRecorded: {
+  label: "WorkflowExecutionCompleted"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+
+# Legend
+legend_history_start: "" {style.opacity: 0}
+legend_history_end: "" {style.opacity: 0}
+legend_history_start -> legend_history_end: {
+  label: "History Event"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+legend_command_start: "" {style.opacity: 0}
+legend_command_end: "" {style.opacity: 0}
+legend_command_start -> legend_command_end: {
+  label: "Outgoing\nCommand"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+legend_internal_start: "" {style.opacity: 0}
+legend_internal_end: "" {style.opacity: 0}
+legend_internal_start -> legend_internal_end: {
+  label: "Activation Completion\nCommand /\nInternal Trigger"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}

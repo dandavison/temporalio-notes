@@ -1,0 +1,53 @@
+# ModifyWorkflowPropertiesMachine State Machine
+
+# States
+CommandIssued: {
+  shape: rectangle
+}
+
+Created: {
+  shape: rectangle
+}
+
+Done: {
+  shape: rectangle
+}
+
+# Transitions
+Created -> CommandIssued: {
+  label: "CommandScheduled"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+CommandIssued -> Done: {
+  label: "CommandRecorded"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+
+# Legend
+legend_history_start: "" {style.opacity: 0}
+legend_history_end: "" {style.opacity: 0}
+legend_history_start -> legend_history_end: {
+  label: "History Event"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+legend_command_start: "" {style.opacity: 0}
+legend_command_end: "" {style.opacity: 0}
+legend_command_start -> legend_command_end: {
+  label: "Outgoing\nCommand"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+legend_internal_start: "" {style.opacity: 0}
+legend_internal_end: "" {style.opacity: 0}
+legend_internal_start -> legend_internal_end: {
+  label: "Activation Completion\nCommand /\nInternal Trigger"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
