@@ -1,0 +1,89 @@
+# WorkflowTaskMachine State Machine
+
+# States
+Completed: {
+  shape: rectangle
+}
+
+Created: {
+  shape: rectangle
+}
+
+Failed: {
+  shape: rectangle
+}
+
+Scheduled: {
+  shape: rectangle
+}
+
+Started: {
+  shape: rectangle
+}
+
+TimedOut: {
+  shape: rectangle
+}
+
+# Transitions
+Created -> Scheduled: {
+  label: "WorkflowTaskScheduled"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Scheduled -> Started: {
+  label: "WorkflowTaskStarted\n(on_workflow_task_started)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Scheduled -> TimedOut: {
+  label: "WorkflowTaskTimedOut"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Started -> Completed: {
+  label: "WorkflowTaskCompleted\n(on_workflow_task_completed)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Started -> Failed: {
+  label: "WorkflowTaskFailed\n(on_workflow_task_failed)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Started -> TimedOut: {
+  label: "WorkflowTaskTimedOut"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+
+# Legend
+legend_history_start: "" {style.opacity: 0}
+legend_history_end: "" {style.opacity: 0}
+legend_history_start -> legend_history_end: {
+  label: "History Event"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+legend_command_start: "" {style.opacity: 0}
+legend_command_end: "" {style.opacity: 0}
+legend_command_start -> legend_command_end: {
+  label: "Outgoing\nCommand"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+legend_internal_start: "" {style.opacity: 0}
+legend_internal_end: "" {style.opacity: 0}
+legend_internal_start -> legend_internal_end: {
+  label: "Activation Completion\nCommand /\nInternal Trigger"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}

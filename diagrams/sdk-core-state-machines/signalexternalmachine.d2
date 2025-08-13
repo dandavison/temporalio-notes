@@ -1,0 +1,107 @@
+# SignalExternalMachine State Machine
+
+# States
+Cancelled: {
+  shape: rectangle
+}
+
+Created: {
+  shape: rectangle
+}
+
+Failed: {
+  shape: rectangle
+}
+
+SignalExternalCommandCreated: {
+  shape: rectangle
+}
+
+SignalExternalCommandRecorded: {
+  shape: rectangle
+}
+
+Signaled: {
+  shape: rectangle
+}
+
+# Transitions
+Created -> SignalExternalCommandCreated: {
+  label: "Schedule\n(on_schedule)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+SignalExternalCommandCreated -> SignalExternalCommandCreated: {
+  label: "CommandSignalExternalWorkflowExecution"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+SignalExternalCommandCreated -> Cancelled: {
+  label: "Cancel\n(on_cancel)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+SignalExternalCommandCreated -> SignalExternalCommandRecorded: {
+  label: "SignalExternalWorkflowExecutionInitiated\n(on_signal_external_workflow_execution_initiated)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+SignalExternalCommandRecorded -> SignalExternalCommandRecorded: {
+  label: "Cancel"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+SignalExternalCommandRecorded -> Signaled: {
+  label: "ExternalWorkflowExecutionSignaled\n(on_external_workflow_execution_signaled)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+SignalExternalCommandRecorded -> Failed: {
+  label: "SignalExternalWorkflowExecutionFailed\n(on_signal_external_workflow_execution_failed)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Cancelled -> Cancelled: {
+  label: "Cancel"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+Signaled -> Signaled: {
+  label: "Cancel"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+
+# Legend
+legend_history_start: "" {style.opacity: 0}
+legend_history_end: "" {style.opacity: 0}
+legend_history_start -> legend_history_end: {
+  label: "History Event"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+legend_command_start: "" {style.opacity: 0}
+legend_command_end: "" {style.opacity: 0}
+legend_command_start -> legend_command_end: {
+  label: "Outgoing\nCommand"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+legend_internal_start: "" {style.opacity: 0}
+legend_internal_end: "" {style.opacity: 0}
+legend_internal_start -> legend_internal_end: {
+  label: "Activation Completion\nCommand /\nInternal Trigger"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}

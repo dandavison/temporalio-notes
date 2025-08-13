@@ -1,0 +1,163 @@
+# UpdateMachine State Machine
+
+# States
+AcceptCommandCreated: {
+  shape: rectangle
+}
+
+AcceptCommandRecorded: {
+  shape: rectangle
+}
+
+Accepted: {
+  shape: rectangle
+}
+
+Completed: {
+  shape: rectangle
+}
+
+CompletedCommandCreated: {
+  shape: rectangle
+}
+
+CompletedCommandRecorded: {
+  shape: rectangle
+}
+
+CompletedImmediately: {
+  shape: rectangle
+}
+
+CompletedImmediatelyAcceptCreated: {
+  shape: rectangle
+}
+
+CompletedImmediatelyCompleteCreated: {
+  shape: rectangle
+}
+
+Rejected: {
+  shape: rectangle
+}
+
+RequestInitiated: {
+  shape: rectangle
+}
+
+# Transitions
+RequestInitiated -> Accepted: {
+  label: "Accept\n(on_accept)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+RequestInitiated -> Rejected: {
+  label: "Reject\n(on_reject)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+Accepted -> CompletedImmediately: {
+  label: "Complete\n(on_complete)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+Accepted -> CompletedImmediately: {
+  label: "Reject\n(on_fail)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+Accepted -> AcceptCommandCreated: {
+  label: "CommandProtocolMessage"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+AcceptCommandCreated -> AcceptCommandRecorded: {
+  label: "WorkflowExecutionUpdateAccepted"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+AcceptCommandCreated -> CompletedImmediatelyAcceptCreated: {
+  label: "Complete\n(on_complete)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+AcceptCommandCreated -> CompletedImmediatelyAcceptCreated: {
+  label: "Reject\n(on_fail)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+AcceptCommandRecorded -> Completed: {
+  label: "Complete\n(on_complete)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+AcceptCommandRecorded -> Completed: {
+  label: "Reject\n(on_fail)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+Completed -> CompletedCommandCreated: {
+  label: "CommandProtocolMessage"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+CompletedCommandCreated -> CompletedCommandRecorded: {
+  label: "WorkflowExecutionUpdateCompleted"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+CompletedImmediately -> CompletedImmediatelyAcceptCreated: {
+  label: "CommandProtocolMessage"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+CompletedImmediatelyAcceptCreated -> CompletedImmediatelyCompleteCreated: {
+  label: "CommandProtocolMessage"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+CompletedImmediatelyCompleteCreated -> CompletedCommandCreated: {
+  label: "WorkflowExecutionUpdateAccepted"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+
+# Legend
+legend_history_start: "" {style.opacity: 0}
+legend_history_end: "" {style.opacity: 0}
+legend_history_start -> legend_history_end: {
+  label: "History Event"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+legend_command_start: "" {style.opacity: 0}
+legend_command_end: "" {style.opacity: 0}
+legend_command_start -> legend_command_end: {
+  label: "Outgoing\nCommand"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+legend_internal_start: "" {style.opacity: 0}
+legend_internal_end: "" {style.opacity: 0}
+legend_internal_start -> legend_internal_end: {
+  label: "Activation Completion\nCommand /\nInternal Trigger"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}

@@ -1,0 +1,213 @@
+# ChildWorkflowMachine State Machine
+
+# States
+Cancelled: {
+  shape: rectangle
+}
+
+Completed: {
+  shape: rectangle
+}
+
+Created: {
+  shape: rectangle
+}
+
+Failed: {
+  shape: rectangle
+}
+
+StartCommandCreated: {
+  shape: rectangle
+}
+
+StartEventRecorded: {
+  shape: rectangle
+}
+
+StartFailed: {
+  shape: rectangle
+}
+
+Started: {
+  shape: rectangle
+}
+
+Terminated: {
+  shape: rectangle
+}
+
+TimedOut: {
+  shape: rectangle
+}
+
+# Transitions
+Created -> StartCommandCreated: {
+  label: "Schedule\n(on_schedule)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+StartCommandCreated -> StartCommandCreated: {
+  label: "CommandStartChildWorkflowExecution"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+StartCommandCreated -> StartEventRecorded: {
+  label: "StartChildWorkflowExecutionInitiated\n(on_start_child_workflow_execution_initiated)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+StartCommandCreated -> Cancelled: {
+  label: "Cancel\n(on_cancelled)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+StartEventRecorded -> Started: {
+  label: "ChildWorkflowExecutionStarted\n(on_child_workflow_execution_started)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+StartEventRecorded -> StartFailed: {
+  label: "StartChildWorkflowExecutionFailed\n(on_start_child_workflow_execution_failed)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Started -> Completed: {
+  label: "ChildWorkflowExecutionCompleted\n(on_child_workflow_execution_completed)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Started -> Failed: {
+  label: "ChildWorkflowExecutionFailed\n(on_child_workflow_execution_failed)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Started -> TimedOut: {
+  label: "ChildWorkflowExecutionTimedOut\n(on_child_workflow_execution_timed_out)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Started -> Cancelled: {
+  label: "ChildWorkflowExecutionCancelled\n(on_child_workflow_execution_cancelled)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Started -> Terminated: {
+  label: "ChildWorkflowExecutionTerminated\n(on_child_workflow_execution_terminated)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Started -> Started: {
+  label: "Cancel\n(on_cancelled)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+Started -> Cancelled: {
+  label: "Cancel\n(on_cancelled)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+Started -> Started: {
+  label: "CommandRequestCancelExternalWorkflowExecution"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+Cancelled -> Cancelled: {
+  label: "Cancel"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+Cancelled -> Cancelled: {
+  label: "ChildWorkflowExecutionCancelled\n(on_child_workflow_execution_cancelled)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Cancelled -> Cancelled: {
+  label: "ChildWorkflowExecutionCompleted\n(on_child_workflow_execution_completed)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Cancelled -> Cancelled: {
+  label: "ChildWorkflowExecutionFailed\n(on_child_workflow_execution_failed)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Cancelled -> Cancelled: {
+  label: "ChildWorkflowExecutionTimedOut\n(on_child_workflow_execution_timed_out)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Cancelled -> Cancelled: {
+  label: "ChildWorkflowExecutionTerminated\n(on_child_workflow_execution_terminated)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Failed -> Failed: {
+  label: "Cancel"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+StartFailed -> StartFailed: {
+  label: "Cancel"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+TimedOut -> TimedOut: {
+  label: "Cancel"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+Completed -> Completed: {
+  label: "Cancel"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+
+# Legend
+legend_history_start: "" {style.opacity: 0}
+legend_history_end: "" {style.opacity: 0}
+legend_history_start -> legend_history_end: {
+  label: "History Event"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+legend_command_start: "" {style.opacity: 0}
+legend_command_end: "" {style.opacity: 0}
+legend_command_start -> legend_command_end: {
+  label: "Outgoing\nCommand"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+legend_internal_start: "" {style.opacity: 0}
+legend_internal_end: "" {style.opacity: 0}
+legend_internal_start -> legend_internal_end: {
+  label: "Activation Completion\nCommand /\nInternal Trigger"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}

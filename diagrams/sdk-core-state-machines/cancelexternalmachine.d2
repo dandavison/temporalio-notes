@@ -1,0 +1,79 @@
+# CancelExternalMachine State Machine
+
+# States
+CancelRequested: {
+  shape: rectangle
+}
+
+Created: {
+  shape: rectangle
+}
+
+RequestCancelExternalCommandCreated: {
+  shape: rectangle
+}
+
+RequestCancelExternalCommandRecorded: {
+  shape: rectangle
+}
+
+RequestCancelFailed: {
+  shape: rectangle
+}
+
+# Transitions
+Created -> RequestCancelExternalCommandCreated: {
+  label: "Schedule\n(on_schedule)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+RequestCancelExternalCommandCreated -> RequestCancelExternalCommandCreated: {
+  label: "CommandRequestCancelExternalWorkflowExecution"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+RequestCancelExternalCommandCreated -> RequestCancelExternalCommandRecorded: {
+  label: "RequestCancelExternalWorkflowExecutionInitiated\n(on_request_cancel_external_workflow_execution_initiated)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+RequestCancelExternalCommandRecorded -> CancelRequested: {
+  label: "ExternalWorkflowExecutionCancelRequested\n(on_external_workflow_execution_cancel_requested)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+RequestCancelExternalCommandRecorded -> RequestCancelFailed: {
+  label: "RequestCancelExternalWorkflowExecutionFailed\n(on_request_cancel_external_workflow_execution_failed)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+
+# Legend
+legend_history_start: "" {style.opacity: 0}
+legend_history_end: "" {style.opacity: 0}
+legend_history_start -> legend_history_end: {
+  label: "History Event"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+legend_command_start: "" {style.opacity: 0}
+legend_command_end: "" {style.opacity: 0}
+legend_command_start -> legend_command_end: {
+  label: "Outgoing\nCommand"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+legend_internal_start: "" {style.opacity: 0}
+legend_internal_end: "" {style.opacity: 0}
+legend_internal_start -> legend_internal_end: {
+  label: "Activation Completion\nCommand /\nInternal Trigger"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}

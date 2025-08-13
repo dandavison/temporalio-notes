@@ -1,0 +1,239 @@
+# ActivityMachine State Machine
+
+# States
+Canceled: {
+  shape: rectangle
+}
+
+Completed: {
+  shape: rectangle
+}
+
+Created: {
+  shape: rectangle
+}
+
+Failed: {
+  shape: rectangle
+}
+
+ScheduleCommandCreated: {
+  shape: rectangle
+}
+
+ScheduledActivityCancelCommandCreated: {
+  shape: rectangle
+}
+
+ScheduledActivityCancelEventRecorded: {
+  shape: rectangle
+}
+
+ScheduledEventRecorded: {
+  shape: rectangle
+}
+
+Started: {
+  shape: rectangle
+}
+
+StartedActivityCancelCommandCreated: {
+  shape: rectangle
+}
+
+StartedActivityCancelEventRecorded: {
+  shape: rectangle
+}
+
+TimedOut: {
+  shape: rectangle
+}
+
+# Transitions
+Created -> ScheduleCommandCreated: {
+  label: "Schedule\n(on_schedule)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+ScheduleCommandCreated -> ScheduleCommandCreated: {
+  label: "CommandScheduleActivityTask"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+ScheduleCommandCreated -> ScheduledEventRecorded: {
+  label: "ActivityTaskScheduled\n(on_activity_task_scheduled)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+ScheduleCommandCreated -> Canceled: {
+  label: "Cancel\n(on_canceled)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+ScheduleCommandCreated -> Canceled: {
+  label: "Abandon\n(on_abandoned)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+ScheduledEventRecorded -> Started: {
+  label: "ActivityTaskStarted\n(on_task_started)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+ScheduledEventRecorded -> TimedOut: {
+  label: "ActivityTaskTimedOut\n(on_task_timed_out)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+ScheduledEventRecorded -> ScheduledActivityCancelCommandCreated: {
+  label: "Cancel\n(on_canceled)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+ScheduledEventRecorded -> Canceled: {
+  label: "Abandon\n(on_abandoned)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+Started -> Completed: {
+  label: "ActivityTaskCompleted\n(on_activity_task_completed)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Started -> Failed: {
+  label: "ActivityTaskFailed\n(on_activity_task_failed)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Started -> TimedOut: {
+  label: "ActivityTaskTimedOut\n(on_activity_task_timed_out)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Started -> StartedActivityCancelCommandCreated: {
+  label: "Cancel\n(on_canceled)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+Started -> Canceled: {
+  label: "Abandon\n(on_abandoned)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+ScheduledActivityCancelCommandCreated -> ScheduledActivityCancelCommandCreated: {
+  label: "CommandRequestCancelActivityTask"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+ScheduledActivityCancelCommandCreated -> ScheduledActivityCancelEventRecorded: {
+  label: "ActivityTaskCancelRequested"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+ScheduledActivityCancelEventRecorded -> Canceled: {
+  label: "ActivityTaskCanceled\n(on_activity_task_canceled)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+ScheduledActivityCancelEventRecorded -> StartedActivityCancelEventRecorded: {
+  label: "ActivityTaskStarted"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+ScheduledActivityCancelEventRecorded -> TimedOut: {
+  label: "ActivityTaskTimedOut\n(on_activity_task_timed_out)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+StartedActivityCancelCommandCreated -> StartedActivityCancelCommandCreated: {
+  label: "CommandRequestCancelActivityTask"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+StartedActivityCancelCommandCreated -> StartedActivityCancelEventRecorded: {
+  label: "ActivityTaskCancelRequested"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+StartedActivityCancelEventRecorded -> Failed: {
+  label: "ActivityTaskFailed\n(on_activity_task_failed)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+StartedActivityCancelEventRecorded -> Completed: {
+  label: "ActivityTaskCompleted\n(on_activity_task_completed)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+StartedActivityCancelEventRecorded -> TimedOut: {
+  label: "ActivityTaskTimedOut\n(on_activity_task_timed_out)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+StartedActivityCancelEventRecorded -> Canceled: {
+  label: "ActivityTaskCanceled\n(on_activity_task_canceled)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Canceled -> Canceled: {
+  label: "ActivityTaskStarted\n(on_activity_task_started)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Canceled -> Canceled: {
+  label: "ActivityTaskCompleted\n(on_activity_task_completed)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+
+# Legend
+legend_history_start: "" {style.opacity: 0}
+legend_history_end: "" {style.opacity: 0}
+legend_history_start -> legend_history_end: {
+  label: "History Event"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+legend_command_start: "" {style.opacity: 0}
+legend_command_end: "" {style.opacity: 0}
+legend_command_start -> legend_command_end: {
+  label: "Outgoing\nCommand"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+legend_internal_start: "" {style.opacity: 0}
+legend_internal_end: "" {style.opacity: 0}
+legend_internal_start -> legend_internal_end: {
+  label: "Activation Completion\nCommand /\nInternal Trigger"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}

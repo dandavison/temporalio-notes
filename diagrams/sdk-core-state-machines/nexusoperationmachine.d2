@@ -1,0 +1,231 @@
+# NexusOperationMachine State Machine
+
+# States
+Cancelled: {
+  shape: rectangle
+}
+
+Completed: {
+  shape: rectangle
+}
+
+Failed: {
+  shape: rectangle
+}
+
+ScheduleCommandCreated: {
+  shape: rectangle
+}
+
+ScheduledEventRecorded: {
+  shape: rectangle
+}
+
+Started: {
+  shape: rectangle
+}
+
+TimedOut: {
+  shape: rectangle
+}
+
+# Transitions
+ScheduleCommandCreated -> ScheduleCommandCreated: {
+  label: "CommandScheduleNexusOperation"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+ScheduleCommandCreated -> ScheduledEventRecorded: {
+  label: "NexusOperationScheduled\n(on_scheduled)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+ScheduleCommandCreated -> Cancelled: {
+  label: "Cancel\n(on_cancelled)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+ScheduledEventRecorded -> ScheduledEventRecorded: {
+  label: "Cancel\n(on_issue_cancel)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+ScheduledEventRecorded -> ScheduledEventRecorded: {
+  label: "CommandRequestCancelNexusOperation"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+ScheduledEventRecorded -> ScheduledEventRecorded: {
+  label: "NexusOperationCancelRequested"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+ScheduledEventRecorded -> Completed: {
+  label: "NexusOperationCompleted\n(on_completed)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+ScheduledEventRecorded -> Failed: {
+  label: "NexusOperationFailed\n(on_failed)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+ScheduledEventRecorded -> Cancelled: {
+  label: "NexusOperationCanceled\n(on_canceled)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+ScheduledEventRecorded -> TimedOut: {
+  label: "NexusOperationTimedOut\n(on_timed_out)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+ScheduledEventRecorded -> Started: {
+  label: "NexusOperationStarted\n(on_started)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Started -> Started: {
+  label: "Cancel\n(on_issue_cancel)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+Started -> Cancelled: {
+  label: "Cancel\n(on_issue_cancel)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+Started -> Started: {
+  label: "CommandRequestCancelNexusOperation"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+Started -> Started: {
+  label: "NexusOperationCancelRequested"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Started -> Completed: {
+  label: "NexusOperationCompleted\n(on_completed)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Started -> Failed: {
+  label: "NexusOperationFailed\n(on_failed)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Started -> Cancelled: {
+  label: "NexusOperationCanceled\n(on_canceled)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Started -> TimedOut: {
+  label: "NexusOperationTimedOut\n(on_timed_out)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Cancelled -> Cancelled: {
+  label: "Cancel"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+Cancelled -> Cancelled: {
+  label: "CommandRequestCancelNexusOperation"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+Cancelled -> Cancelled: {
+  label: "NexusOperationCancelRequested"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Cancelled -> Cancelled: {
+  label: "NexusOperationCompleted\n(on_completed)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Cancelled -> Cancelled: {
+  label: "NexusOperationFailed\n(on_failed)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Cancelled -> Cancelled: {
+  label: "NexusOperationTimedOut\n(on_timed_out)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Cancelled -> Cancelled: {
+  label: "NexusOperationCanceled"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Completed -> Completed: {
+  label: "Cancel"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+Failed -> Failed: {
+  label: "Cancel"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+TimedOut -> TimedOut: {
+  label: "Cancel"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+
+# Legend
+legend_history_start: "" {style.opacity: 0}
+legend_history_end: "" {style.opacity: 0}
+legend_history_start -> legend_history_end: {
+  label: "History Event"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+legend_command_start: "" {style.opacity: 0}
+legend_command_end: "" {style.opacity: 0}
+legend_command_start -> legend_command_end: {
+  label: "Outgoing\nCommand"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+legend_internal_start: "" {style.opacity: 0}
+legend_internal_end: "" {style.opacity: 0}
+legend_internal_start -> legend_internal_end: {
+  label: "Activation Completion\nCommand /\nInternal Trigger"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}

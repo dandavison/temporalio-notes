@@ -1,0 +1,123 @@
+# TimerMachine State Machine
+
+# States
+CancelTimerCommandCreated: {
+  shape: rectangle
+}
+
+CancelTimerCommandSent: {
+  shape: rectangle
+}
+
+Canceled: {
+  shape: rectangle
+}
+
+Created: {
+  shape: rectangle
+}
+
+Fired: {
+  shape: rectangle
+}
+
+StartCommandCreated: {
+  shape: rectangle
+}
+
+StartCommandRecorded: {
+  shape: rectangle
+}
+
+# Transitions
+Created -> StartCommandCreated: {
+  label: "Schedule\n(on_schedule)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+StartCommandCreated -> StartCommandCreated: {
+  label: "CommandStartTimer"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+StartCommandCreated -> StartCommandRecorded: {
+  label: "TimerStarted\n(on_timer_started)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+StartCommandCreated -> Canceled: {
+  label: "Cancel\n(on_cancel)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+StartCommandRecorded -> Fired: {
+  label: "TimerFired\n(on_timer_fired)"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+StartCommandRecorded -> CancelTimerCommandCreated: {
+  label: "Cancel\n(on_cancel)"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+CancelTimerCommandCreated -> CancelTimerCommandCreated: {
+  label: "Cancel"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+CancelTimerCommandCreated -> CancelTimerCommandSent: {
+  label: "CommandCancelTimer\n(on_command_cancel_timer)"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+CancelTimerCommandSent -> Canceled: {
+  label: "TimerCanceled"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+Canceled -> Canceled: {
+  label: "Cancel"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+Fired -> Fired: {
+  label: "Cancel"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
+
+
+# Legend
+legend_history_start: "" {style.opacity: 0}
+legend_history_end: "" {style.opacity: 0}
+legend_history_start -> legend_history_end: {
+  label: "History Event"
+  style.stroke: "#1565c0"
+  style.stroke-width: 2
+}
+
+legend_command_start: "" {style.opacity: 0}
+legend_command_end: "" {style.opacity: 0}
+legend_command_start -> legend_command_end: {
+  label: "Outgoing\nCommand"
+  style.stroke: "#2e7d32"
+  style.stroke-width: 2
+}
+
+legend_internal_start: "" {style.opacity: 0}
+legend_internal_end: "" {style.opacity: 0}
+legend_internal_start -> legend_internal_end: {
+  label: "Activation Completion\nCommand /\nInternal Trigger"
+  style.stroke: "#6a1b9a"
+  style.stroke-width: 2
+}
