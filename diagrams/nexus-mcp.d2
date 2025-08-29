@@ -1,0 +1,30 @@
+shape: sequence_diagram
+agent: {
+  label: Agent
+}
+mcp-proxy: {
+  label: MCP Proxy
+}
+caller-ns: {
+  label: Caller Namespace
+}
+handler-ns: {
+  label: Handler Namespace
+}
+nexus-gateway: {
+  label: Nexus Gateway
+}
+
+agent -> mcp-proxy: tools/call
+mcp-proxy -> caller-ns: nexus Start\n/service/operation
+caller-ns -> handler-ns: nexus Start\n/service/operation
+handler-ns -> nexus-gateway: nexus task
+nexus-gateway -> handler-ns: start handler wf
+nexus-gateway -> handler-ns: operation token
+handler-ns -> caller-ns: operation token
+caller-ns -> mcp-proxy: operation token
+mcp-proxy -> caller-ns: nexus Get\n/service/operation\n(long poll)
+handler-ns."handler wf\ncompletes"
+handler-ns -> caller-ns: nexus callback
+caller-ns -> mcp-proxy: long poll\nreleased
+mcp-proxy -> agent: tool result

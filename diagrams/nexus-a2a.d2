@@ -1,0 +1,32 @@
+shape: sequence_diagram
+agent: {
+  label: Agent
+}
+a2a-proxy: {
+  label: a2a Proxy
+}
+caller-ns: {
+  label: Caller Namespace
+}
+handler-ns: {
+  label: Handler Namespace
+}
+nexus-gateway: {
+  label: Nexus Gateway
+}
+
+agent -> a2a-proxy: messages/send
+a2a-proxy -> caller-ns: nexus Start\n/service/operation
+caller-ns -> handler-ns: nexus Start\n/service/operation
+handler-ns -> nexus-gateway: nexus task
+nexus-gateway -> handler-ns: start handler wf
+nexus-gateway -> handler-ns: operation token
+handler-ns -> caller-ns: operation token
+caller-ns -> a2a-proxy: operation token
+a2a-proxy -> agent: Task ID\n(running)
+agent -> a2a-proxy: tasks/get
+a2a-proxy -> caller-ns: nexus Get\n/service/operation\n(long poll)
+handler-ns."handler wf\ncompletes"
+handler-ns -> caller-ns: nexus callback
+caller-ns -> a2a-proxy: long poll\nreleased
+a2a-proxy -> agent: Task\n(completed)
