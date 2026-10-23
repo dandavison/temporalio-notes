@@ -74,8 +74,9 @@ from temporalio.worker import Worker
 
 client = await Client.connect(
     "localhost:7233",
-    # The first listed backend is the default.
-    stream_backends=StreamBackends([RedisStreamBackend("redis://localhost:6379")]),
+    stream_backends=StreamBackends(
+        [RedisStreamBackend("redis://localhost:6379")], default="redis"
+    ),
 )
 
 worker = Worker(client, task_queue="agent",
@@ -113,13 +114,13 @@ client = await Client.connect(
     "localhost:7233",
     stream_backends=StreamBackends(
         [RedisStreamBackend("redis://localhost:6379")],
-        default="native",  # else the first listed backend
+        default="native",
     ),
 )</code></pre>
 </div>
 </div>
 
-<p class="note">Moe's Brook Worker raises <code>ValueError</code> with two Stream plugins; Jetty accepts them. Links: Dan <a href="http://wormhole:7117/file/Users/dan/worktrees/internal-ai-prototypes-dan/2026--10--streams-interface/internal-ai-prototypes-dan/sdk-python/temporalio/streams/_backend.py:282?land-in=editor"><code>StreamBackends</code></a>, <a href="http://wormhole:7117/file/Users/dan/worktrees/internal-ai-prototypes-dan/2026--10--streams-interface/internal-ai-prototypes-dan/sdk-python/temporalio/contrib/redis_streams/__init__.py:80?land-in=editor"><code>RedisStreamBackend</code></a>; Moe <a href="http://wormhole:7117/file/Users/dan/tmp/3p/ai/temporalio--internal-ai-prototypes/jetty/sdk-python/temporalio/contrib/streams/redis.py:222?land-in=editor"><code>RedisStreamPlugin</code></a>, <a href="http://wormhole:7117/file/Users/dan/tmp/3p/ai/temporalio--internal-ai-prototypes/jetty/sdk-python/temporalio/contrib/streams/native.py:190?land-in=editor"><code>NativeStreamPlugin</code></a>.</p>
+<p class="note">Dan's requires <code>default=</code> whenever an external backend is configured; Moe's uses plugin order unless one plugin has <code>default=True</code>. Moe's Brook Worker raises <code>ValueError</code> with two Stream plugins; Jetty accepts them. Links: Dan <a href="http://wormhole:7117/file/Users/dan/worktrees/internal-ai-prototypes-dan/2026--10--streams-interface/internal-ai-prototypes-dan/sdk-python/temporalio/streams/_backend.py:282?land-in=editor"><code>StreamBackends</code></a>, <a href="http://wormhole:7117/file/Users/dan/worktrees/internal-ai-prototypes-dan/2026--10--streams-interface/internal-ai-prototypes-dan/sdk-python/temporalio/contrib/redis_streams/__init__.py:80?land-in=editor"><code>RedisStreamBackend</code></a>; Moe <a href="http://wormhole:7117/file/Users/dan/tmp/3p/ai/temporalio--internal-ai-prototypes/jetty/sdk-python/temporalio/contrib/streams/redis.py:222?land-in=editor"><code>RedisStreamPlugin</code></a>, <a href="http://wormhole:7117/file/Users/dan/tmp/3p/ai/temporalio--internal-ai-prototypes/jetty/sdk-python/temporalio/contrib/streams/native.py:190?land-in=editor"><code>NativeStreamPlugin</code></a>.</p>
 
 <h2>2. Declare the stream</h2>
 <div class="sbs">
@@ -166,7 +167,9 @@ class Turn:
 <pre><code class="language-python">plugins=[RedisStreamPlugin("redis://localhost:6379")]</code></pre>
 </div>
 <div class="dan"><div class="label">Dan</div>
-<pre><code class="language-python">stream_backends=StreamBackends([RedisStreamBackend("redis://localhost:6379")])</code></pre>
+<pre><code class="language-python">stream_backends=StreamBackends(
+    [RedisStreamBackend("redis://localhost:6379")], default="redis"
+)</code></pre>
 </div>
 </div>
 <div class="sbs">
@@ -245,7 +248,8 @@ class Agent:
 </div>
 <div class="dan"><div class="label">Dan</div>
 <pre><code class="language-python">stream_backends=StreamBackends(
-    [RedisStreamBackend("redis://localhost:6379")],  # backend "redis"; first, so the default
+    [RedisStreamBackend("redis://localhost:6379")],  # backend "redis"
+    default="redis",                                 # the default
 )
 # Backend "native" needs no config.</code></pre>
 </div>
