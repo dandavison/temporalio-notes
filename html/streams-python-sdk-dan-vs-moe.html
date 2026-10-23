@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Streams: the Python SDK user's code, Moe (Jetty) vs Dan</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 1400px; margin: 2em auto; padding: 0 1.5em; line-height: 1.45; color: #1d1d1f; }
+  h1 { font-size: 1.6em; } h2 { margin-top: 2.2em; border-bottom: 1px solid #ddd; padding-bottom: .2em; } h3 { margin-top: 1.5em; }
+  code { font-family: ui-monospace, Menlo, monospace; font-size: .9em; background: #f3f3f5; padding: 0 .25em; border-radius: 3px; }
+  pre { background: #f7f7f9; border: 1px solid #e3e3e8; border-radius: 6px; padding: .8em 1em; overflow-x: auto; font-size: .82em; line-height: 1.4; margin: 0; }
+  pre code { background: none; padding: 0; }
+  .sbs { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; margin: .8em 0 1.2em; }
+  .sbs > div > .label { font-weight: 600; font-size: .85em; margin-bottom: .3em; }
+  .dan .label { color: #0b6b3a; } .moe .label { color: #8a3b00; }
+  table { border-collapse: collapse; margin: .8em 0 1.2em; font-size: .92em; }
+  th, td { border: 1px solid #ddd; padding: .35em .6em; vertical-align: top; text-align: left; }
+  th { background: #f3f3f5; }
+  .note { color: #555; font-size: .92em; }
+  ul li { margin: .2em 0; }
+  pre code.hljs { background: none; padding: 0; }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script>hljs.highlightAll();</script>
+</head>
+<body>
+
+<h1>Streams: the Python SDK user's code, Moe (Jetty) vs Dan</h1>
+
+<p class="note">
+Scope: the code a user writes to configure workers and clients, publish from activities and workflows, and consume in a UI backend.
+Workflow reads and suspend-and-notify are left out.
+Dan: <code>sdk-python</code> <code>098a10df</code> (superproject <code>2026/10/ai198-streams-dan</code>), package <code>temporalio.streams</code>.
+Moe: Jetty <code>sdk-python</code> <code>bbbadf0a</code> (branch <code>moe/jetty/v2/j5-direct-reads</code>), package <code>temporalio.contrib.streams</code>; compared against Brook <code>a6ff7beb</code>.
+Moe's READMEs read as AI-written; claims taken from them are marked as such.
+</p>
+
+<h2>Findings</h2>
+<ul>
+  <li><b>Moe's Jetty Python API is Brook's plus additions.</b> Brook <code>a6ff7beb</code> is an ancestor of Jetty <code>bbbadf0a</code>; the seven Brook example programs are byte-identical in Jetty. Jetty adds <code>NativeStreamPlugin</code>, <code>subscribe</code> in workflow code, and more than one Stream plugin per Worker. The one user-visible difference: a Brook Worker accepts only one Stream plugin (<a href="http://wormhole:7117/file/Users/dan/tmp/3p/ai/temporalio--internal-ai-prototypes/brook/sdk-python/temporalio/contrib/streams/redis.py:83?land-in=editor">ValueError "The Worker has another extension"</a>). Nothing a Brook user writes breaks at Jetty.</li>
+  <li><b>Native is opt-in in Moe's design, and the default in Dan's.</b> Moe: a client or Worker with no Stream plugin raises <code>StreamConfigError</code>; native needs <code>plugins=[NativeStreamPlugin()]</code>. Dan: every client has the <code>native</code> backend and it is the default; Redis is an added backend. So Dan's design matches "streams work with no external service; Redis is an optional drop-in"; Moe's Jetty docs would instead say "add a Stream plugin: Redis or native".</li>
+  <li><b>In both, the backend is a property of each stream, recorded in its handle, and chosen from the default at create time.</b> Neither is a transparent drop-in at the level of a running workflow. Moe's Jetty README says a change of the default "changes the commands of replayed creates" and prescribes <code>workflow.patched</code> (<a href="http://wormhole:7117/file/Users/dan/tmp/3p/ai/temporalio--internal-ai-prototypes/jetty/README.md:61?land-in=editor">README</a>). In Dan's, workflow stream writes are not commands, so there is no nondeterminism error, but a running workflow whose default changes would write later records to the other backend. I have not tested that case in Dan's.</li>
+  <li><b>Workflow publish works differently.</b> Moe: each <code>create_stream</code>, <code>publish</code> and <code>close</code> in workflow code is one Local Activity (a marker in History), on Redis and on native. Dan: the worker appends at the end of the activation and adds nothing to History; a store failure fails the workflow task.</li>
+  <li><b>Typing.</b> Moe: a <code>@streams.defn</code> class declares the stream name and each topic's type, and handles are generic in it. Dan: streams are identified by string names and handles are untyped; a type is given per topic (<code>topic("turns", type=Turn)</code>) or per read.</li>
+  <li><b>Where streams can live.</b> At Jetty, Moe's native server supports standalone streams and workflow-embedded streams (<a href="http://wormhole:7117/file/Users/dan/tmp/3p/ai/temporalio--internal-ai-prototypes/jetty/temporal/chasm/lib/stream/host.go:38?land-in=editor"><code>targetOf</code></a>). Neither of Moe's stages has Standalone-Activity-embedded streams. Dan's has all three.</li>
+</ul>
+
+<h2>1. Configure the client and the workers</h2>
+
+<p>In both, stream configuration lives on the client, and a <code>Worker</code> built from the client inherits it. Neither needs stream-specific worker arguments. Dan's is a client config field, <code>stream_backends</code>, because streams are built into the SDK; Moe's is a plugin because his streams machinery (interceptors, Local Activities, Core extension) only exists when a plugin installs it.</p>
+
+<h3>Redis only (the Brook configuration)</h3>
+<div class="sbs">
+<div class="moe"><div class="label">Moe</div>
+<pre><code class="language-python">from temporalio.client import Client
+from temporalio.contrib.streams.redis import RedisStreamPlugin
+from temporalio.worker import Worker
+
+client = await Client.connect(
+    "localhost:7233",
+    # Registers backend name "redis".
+    plugins=[RedisStreamPlugin("redis://localhost:6379")],
+)
+
+worker = Worker(client, task_queue="agent",
+                workflows=[Agent], activities=[call_model])</code></pre>
+</div>
+<div class="dan"><div class="label">Dan</div>
+<pre><code class="language-python">from temporalio.client import Client
+from temporalio.contrib.redis_streams import RedisStreamBackend
+from temporalio.streams import StreamBackends
+from temporalio.worker import Worker
+
+client = await Client.connect(
+    "localhost:7233",
+    # The first listed backend is the default.
+    stream_backends=StreamBackends([RedisStreamBackend("redis://localhost:6379")]),
+)
+
+worker = Worker(client, task_queue="agent",
+                workflows=[Agent], activities=[call_model])</code></pre>
+</div>
+</div>
+
+<h3>Native only (Jetty)</h3>
+<div class="sbs">
+<div class="moe"><div class="label">Moe</div>
+<pre><code class="language-python">from temporalio.contrib.streams.native import NativeStreamPlugin
+
+client = await Client.connect(
+    "localhost:7233", plugins=[NativeStreamPlugin()]
+)</code></pre>
+</div>
+<div class="dan"><div class="label">Dan</div>
+<pre><code class="language-python">client = await Client.connect("localhost:7233")  # no stream config</code></pre>
+</div>
+</div>
+
+<h3>Both</h3>
+<div class="sbs">
+<div class="moe"><div class="label">Moe</div>
+<pre><code class="language-python">client = await Client.connect(
+    "localhost:7233",
+    plugins=[
+        RedisStreamPlugin("redis://localhost:6379"),  # first = default
+        NativeStreamPlugin(),                         # or default=True
+    ],
+)</code></pre>
+</div>
+<div class="dan"><div class="label">Dan</div>
+<pre><code class="language-python">client = await Client.connect(
+    "localhost:7233",
+    stream_backends=StreamBackends(
+        [RedisStreamBackend("redis://localhost:6379")],
+        default="native",  # else the first listed backend
+    ),
+)</code></pre>
+</div>
+</div>
+
+<p class="note">Moe's Brook Worker raises <code>ValueError</code> with two Stream plugins; Jetty accepts them. Links: Dan <a href="http://wormhole:7117/file/Users/dan/worktrees/internal-ai-prototypes-dan/2026--10--streams-interface/internal-ai-prototypes-dan/sdk-python/temporalio/streams/_backend.py:282?land-in=editor"><code>StreamBackends</code></a>, <a href="http://wormhole:7117/file/Users/dan/worktrees/internal-ai-prototypes-dan/2026--10--streams-interface/internal-ai-prototypes-dan/sdk-python/temporalio/contrib/redis_streams/__init__.py:80?land-in=editor"><code>RedisStreamBackend</code></a>; Moe <a href="http://wormhole:7117/file/Users/dan/tmp/3p/ai/temporalio--internal-ai-prototypes/jetty/sdk-python/temporalio/contrib/streams/redis.py:222?land-in=editor"><code>RedisStreamPlugin</code></a>, <a href="http://wormhole:7117/file/Users/dan/tmp/3p/ai/temporalio--internal-ai-prototypes/jetty/sdk-python/temporalio/contrib/streams/native.py:190?land-in=editor"><code>NativeStreamPlugin</code></a>.</p>
+
+<h2>2. Declare the stream</h2>
+<div class="sbs">
+<div class="moe"><div class="label">Moe</div>
+<pre><code class="language-python">from temporalio.contrib import streams
+
+@dataclass
+class Turn:
+    kind: str
+    text: str = ""
+
+@streams.defn(name="events")
+class Events:
+    turns = streams.topic(Turn)
+    tokens = streams.topic(str)
+
+# Another stream with the same topics:
+Turn3 = streams.with_name(Events, "turn-3")</code></pre>
+</div>
+<div class="dan"><div class="label">Dan</div>
+<pre><code class="language-python"># Nothing to declare. A stream is identified by a string name,
+# and a type is given per topic where it is used.
+
+@dataclass
+class Turn:
+    kind: str
+    text: str = ""</code></pre>
+</div>
+</div>
+
+<p>What <code>@streams.defn(name=...)</code> does in Moe's (<a href="http://wormhole:7117/file/Users/dan/tmp/3p/ai/temporalio--internal-ai-prototypes/jetty/sdk-python/temporalio/contrib/streams/_defn.py:99?land-in=editor"><code>_defn.py</code></a>):</p>
+<ul>
+  <li>It collects the class's <code>streams.topic(T)</code> attributes, including inherited ones, checks that topic names are unique, and attaches a <code>StreamDefinition(name, topics)</code> to the class. <code>name</code> defaults to the class name. It registers nothing with a worker or client, and the class has no methods to implement.</li>
+  <li>The name is the stream's identity. <code>create_stream(Events)</code> in a workflow creates the stream with ID <code>&lt;workflow id&gt;:&lt;first run id&gt;:events</code>. <code>StreamClient(client).workflow_stream(handle, Events)</code> computes the same ID from the workflow handle, with no call to the server. <code>with_name</code> makes a subclass with the same topics under another name, so one workflow can have several streams of one definition.</li>
+  <li>The topics are a typed contract shared by writers and readers. Handles are generic in the definition, so <code>stream.topic(Events.turns)</code> is a topic of <code>Turn</code> for the type checker, and a read decodes each topic's values as its declared type. A topic name not in the definition raises unless <code>type=</code> is given.</li>
+  <li>The definition does not travel with a handle. A handle serializes as its ID, owner and backend, and the receiving parameter's type (for example <code>ActivityStream[Events]</code>) provides the definition again.</li>
+</ul>
+<p>Compared with the SDK's other <code>defn</code> decorators: like <code>@workflow.defn</code> and <code>@activity.defn</code>, it fixes a name that both sides use (there, the workflow or activity type on the wire; here, part of the stream ID) and gives callers a typed reference, as <code>client.start_workflow(Agent.run, ...)</code> uses the workflow class. Unlike them, it has no implementation and is not registered with a worker. It is a schema, closer to a Nexus <code>@nexusrpc.service</code> interface definition than to <code>@workflow.defn</code>.</p>
+
+<h2>3. Workflow: create, publish, pass to an activity</h2>
+<p>Client config assumed in steps 3 to 6 (Brook: Redis is the only backend):</p>
+<div class="sbs">
+<div class="moe"><div class="label">Moe</div>
+<pre><code class="language-python">plugins=[RedisStreamPlugin("redis://localhost:6379")]</code></pre>
+</div>
+<div class="dan"><div class="label">Dan</div>
+<pre><code class="language-python">stream_backends=StreamBackends([RedisStreamBackend("redis://localhost:6379")])</code></pre>
+</div>
+</div>
+<div class="sbs">
+<div class="moe"><div class="label">Moe</div>
+<pre><code class="language-python">from temporalio import workflow
+from temporalio.contrib import streams
+from temporalio.contrib.streams import workflow as stream_workflow
+
+@dataclass
+class CallModelInput:
+    prompt: str
+    stream: streams.ActivityStream[Events]
+
+@workflow.defn
+class Agent:
+    @workflow.run
+    async def run(self, prompt: str) -> str:
+        # Created on the worker's default backend: Redis.
+        stream = await stream_workflow.create_stream(Events)
+        turns = stream.topic(Events.turns)
+
+        await turns.publish(Turn("model"))   # returns the offset
+
+        reply = await workflow.execute_activity(
+            call_model,
+            # The parameter's type picks the handle class.
+            CallModelInput(prompt, streams.ActivityStream.from_handle(stream)),
+            start_to_close_timeout=timedelta(minutes=5),
+        )
+        await turns.publish(Turn("done", reply))
+        return reply
+        # close_with_run=True by default: closes with the run chain.</code></pre>
+</div>
+<div class="dan"><div class="label">Dan</div>
+<pre><code class="language-python">from temporalio import workflow
+
+@workflow.defn
+class Agent:
+    @workflow.run
+    async def run(self, prompt: str) -> str:
+        # Created on the worker's default backend: Redis.
+        events = await workflow.create_stream("events")
+        turns = events.topic("turns", type=Turn)
+
+        await turns.publish(Turn("model"))   # returns None
+
+        reply = await workflow.execute_activity(
+            call_model,
+            args=[events, prompt],           # the handle is a value
+            start_to_close_timeout=timedelta(minutes=5),
+        )
+        await turns.publish(Turn("done", reply))
+        return reply
+        # The stream closes when the run ends (native: server;
+        # Redis: worker, after the server accepts the completion).</code></pre>
+</div>
+</div>
+
+<table>
+<tr><th></th><th>Moe (Brook and Jetty)</th><th>Dan</th></tr>
+<tr><td>What <code>await publish</code> does</td><td>Runs one Local Activity per call (marker in History). Same on Redis and native.</td><td>Hands records to the worker, which appends once nothing else in the workflow can run, in the same activation. Adds nothing to History.</td></tr>
+<tr><td>Store error</td><td>Raises a <code>StreamError</code> at the <code>await</code>. A config error (no plugin, unknown backend) fails the workflow task.</td><td>Fails the workflow task; workflow code never sees it.</td></tr>
+<tr><td>Sync workflow code (<code>@workflow.init</code>, sync handlers)</td><td><code>create_stream_nowait</code>, <code>publish_nowait</code>, <code>close_nowait</code>.</td><td>No API.</td></tr>
+<tr><td>Continue-as-new</td><td>The chain owns the stream; the next run gets it with <code>stream_handle(Events)</code> or as an argument.</td><td>Streams are not carried to the next run (Dan's README limits).</td></tr>
+<tr><td>Native-only extra</td><td>None.</td><td>Commit mode: <code>@workflow.defn(stream_commit_mode=True)</code> sends records in the task completion.</td></tr>
+</table>
+
+<h3>Choosing the backend of a stream (Jetty, Redis and native configured)</h3>
+<p>Client config:</p>
+<div class="sbs">
+<div class="moe"><div class="label">Moe</div>
+<pre><code class="language-python">plugins=[
+    RedisStreamPlugin("redis://localhost:6379"),  # backend "redis"; first, so the default
+    NativeStreamPlugin(),                         # backend "native"
+]</code></pre>
+</div>
+<div class="dan"><div class="label">Dan</div>
+<pre><code class="language-python">stream_backends=StreamBackends(
+    [RedisStreamBackend("redis://localhost:6379")],  # backend "redis"; first, so the default
+)
+# Backend "native" needs no config.</code></pre>
+</div>
+</div>
+<p>Workflow code:</p>
+<div class="sbs">
+<div class="moe"><div class="label">Moe</div>
+<pre><code class="language-python"># No backend argument: the default backend, Redis.
+audit = await stream_workflow.create_stream(Audit)
+
+# Explicit backend.
+live = await stream_workflow.create_stream(Live, backend="native")
+
+# Each handle records its backend; activities and readers
+# that receive it use that backend.</code></pre>
+</div>
+<div class="dan"><div class="label">Dan</div>
+<pre><code class="language-python"># No backend argument: the default backend, Redis.
+audit = await workflow.create_stream("audit")
+
+# Explicit backend.
+live = await workflow.create_stream("live", backend="native")
+
+# Each handle records its backend; activities and readers
+# that receive it use that backend.</code></pre>
+</div>
+</div>
+<p class="note">To make native the default instead: Moe <code>NativeStreamPlugin(default=True)</code>; Dan <code>StreamBackends([...], default="native")</code>. In Moe's, <code>Audit</code> and <code>Live</code> are <code>streams.with_name(Events, "audit")</code> and <code>streams.with_name(Events, "live")</code>.</p>
+
+<h2>4. Activity: publish</h2>
+<div class="sbs">
+<div class="moe"><div class="label">Moe</div>
+<pre><code class="language-python">from temporalio import activity
+from temporalio.contrib import streams
+
+@activity.defn
+async def call_model(input: CallModelInput) -> str:
+    tokens = input.stream.topic(Events.tokens)
+    await tokens.publish("first")            # one append, returns offset
+
+    async with streams.BufferedPublisher(
+        tokens, max_delay=timedelta(milliseconds=100)
+    ) as buf:                                # timer flushes; exit flushes
+        async for chunk in llm(input.prompt):
+            buf.publish(chunk)
+    return "..."
+
+# Sync activity in a thread pool: type the field as
+#   streams.SyncActivityStream[Events]; publish() blocks.</code></pre>
+</div>
+<div class="dan"><div class="label">Dan</div>
+<pre><code class="language-python">from temporalio import activity
+from temporalio.streams import StreamHandleBase
+
+@activity.defn
+async def call_model(events: StreamHandleBase, prompt: str) -> str:
+    stream = activity.get_stream_handle(events)
+    tokens = stream.topic("tokens", type=str)
+    await tokens.publish("first")            # one append, awaited
+
+    async with stream.buffered() as buf:     # exit awaits flush()
+        async for chunk in llm(prompt):
+            buf.publish(chunk, topic="tokens")   # memory only
+            await buf.flush()                    # user decides when
+    return "..."
+
+# Sync activity in a thread pool:
+#   activity.get_sync_stream_handle(events).publish("x", topic="tokens")</code></pre>
+</div>
+</div>
+<p class="note">Dan's <a href="http://wormhole:7117/file/Users/dan/worktrees/internal-ai-prototypes-dan/2026--10--streams-interface/internal-ai-prototypes-dan/sdk-python/temporalio/streams/_publisher.py:105?land-in=editor"><code>BufferedStreamWriter</code></a> has no timer; records still buffered when the attempt ends are lost. Moe's <a href="http://wormhole:7117/file/Users/dan/tmp/3p/ai/temporalio--internal-ai-prototypes/jetty/sdk-python/temporalio/contrib/streams/_buffered.py:17?land-in=editor"><code>BufferedPublisher</code></a> flushes on <code>max_delay</code>, and the plugin flushes it at the end of the attempt. In both, the activity gets the stream only from a handle passed in its input.</p>
+
+<h2>5. UI backend: configure the client</h2>
+<p>Same as step 1: the UI backend's client needs the same backends as the workers, so that a handle's backend name resolves. In Moe's design a client with no Stream plugin cannot read even a native stream; in Dan's it reads native streams with no config.</p>
+
+<h2>6. UI backend: consume</h2>
+<div class="sbs">
+<div class="moe"><div class="label">Moe</div>
+<pre><code class="language-python">from temporalio.contrib import streams
+
+handle = await client.start_workflow(
+    Agent.run, "hi", id="agent-1", task_queue="agent"
+)
+# The client's default backend: Redis.
+stream = streams.StreamClient(client).workflow_stream(handle, Events)
+
+async for item in stream.subscribe(          # waits by default
+    Events.turns, Events.tokens,
+    create_wait=timedelta(seconds=10),       # stream may not exist yet
+):
+    if isinstance(item, streams.Superseded):
+        unrender_where(item.withdraws)
+    elif isinstance(item, streams.Closed):
+        done(item.result, item.failure)      # last item
+    else:
+        render(item.topic, item.data)        # item.offset resumes
+
+# One topic:
+stream.topic(Events.turns).subscribe(from_offset=saved_offset + 1)</code></pre>
+</div>
+<div class="dan"><div class="label">Dan</div>
+<pre><code class="language-python">from temporalio.streams import Withdrawal
+
+handle = await client.start_workflow(
+    Agent.run, "hi", id="agent-1", task_queue="agent"
+)
+# The client's default backend: Redis.
+stream = handle.stream("events")
+
+records = stream.fetch_records(wait_new_records=True)  # default False
+async for r in records:
+    if isinstance(r, Withdrawal):
+        unrender(r.cursor)
+    else:
+        render(r.topic, r.value, r.status)   # r.cursor resumes
+# Ends at the close:
+records.close    # StreamClose(status, failure, reason)
+
+# One topic, typed:
+stream.topic("turns", type=Turn).fetch_records(after=saved_cursor)</code></pre>
+</div>
+</div>
+
+<h3>Reading a stream on a non-default backend (Jetty, Redis and native configured as above)</h3>
+<p>A reader that gets a stream by workflow handle and name, not from a handle passed to it, must give the backend unless it is the default.</p>
+<div class="sbs">
+<div class="moe"><div class="label">Moe</div>
+<pre><code class="language-python">sc = streams.StreamClient(client)
+audit = sc.workflow_stream(handle, Audit)                 # default: Redis
+live = sc.workflow_stream(handle, Live, backend="native")
+
+# Try native, then Redis, on first use:
+any_ = sc.workflow_stream(handle, Events, backend=("native", "redis"))</code></pre>
+</div>
+<div class="dan"><div class="label">Dan</div>
+<pre><code class="language-python">audit = handle.stream("audit")                    # default: Redis
+live = handle.stream("live", backend="native")</code></pre>
+</div>
+</div>
+
+<h3>Client-created (standalone) stream passed to a workflow</h3>
+<div class="sbs">
+<div class="moe"><div class="label">Moe</div>
+<pre><code class="language-python">chat = await streams.StreamClient(client).create(Events, id="chat-42")
+await client.start_workflow(
+    Chat.run, stream_workflow.WorkflowStream.from_handle(chat), ...
+)
+async for item in chat.subscribe():
+    ...
+await chat.close()
+# Workflow param: stream: stream_workflow.WorkflowStream[Events]
+# Client writes: await chat.topic(Events.turns).publish(...)</code></pre>
+</div>
+<div class="dan"><div class="label">Dan</div>
+<pre><code class="language-python">async with client.create_stream("chat-42") as chat:   # exit closes it
+    await client.start_workflow(Chat.run, chat, id=..., task_queue=...)
+    async for r in chat.fetch_records(wait_new_records=True):
+        ...
+# Workflow: workflow.get_stream_handle(given).publish(...)
+# Client writes need a named producer:
+#   async with chat.producer("ui") as ui: await ui.publish(...)</code></pre>
+</div>
+</div>
+
+<h2>Where a stream can live</h2>
+<table>
+<tr><th></th><th>Moe Jetty</th><th>Moe Brook</th><th>Dan</th></tr>
+<tr><td>Standalone (client-created)</td><td>Native and Redis</td><td>Redis</td><td>Native and Redis</td></tr>
+<tr><td>Embedded in a workflow run chain</td><td>Native (nested in the first run's CHASM Workflow component) and Redis</td><td>Redis</td><td>Native and Redis (Redis keys it by workflow ID and first run ID)</td></tr>
+<tr><td>Embedded in a Standalone Activity</td><td>No. A Standalone Activity can write to a stream passed to it.</td><td>No</td><td>Native and Redis, via <code>activity.create_stream(name)</code></td></tr>
+</table>
+
+<h2>Brook with no external backend configured</h2>
+<table>
+<tr><th>Call</th><th>Moe (Brook)</th><th>Dan</th></tr>
+<tr><td>Client and Worker construction</td><td>Nothing fails.</td><td>Nothing fails, so apps that don't use streams run.</td></tr>
+<tr><td>Client create / read</td><td><code>StreamConfigError("The client has no Stream plugin, such as RedisStreamPlugin")</code>, before any network call.</td><td>A <code>ValueError</code> saying that native streams are not available and to configure a stream backend, such as <code>RedisStreamBackend</code>, in the client's <code>stream_backends</code>, before any network call.</td></tr>
+<tr><td>Workflow create / publish</td><td><code>StreamConfigError</code> fails the workflow task, which retries; deploying the plugin unblocks it.</td><td>The same message fails the workflow task, which retries; deploying the config unblocks it.</td></tr>
+<tr><td>Activity publish</td><td><code>StreamConfigError</code> raised in the activity.</td><td><code>ValueError</code> raised in the activity.</td></tr>
+</table>
+<p class="note">Neither design gives a type-check-time signal, and one would require the Brook API to differ from Jetty's.</p>
+
+</body>
+</html>
